@@ -8,10 +8,10 @@ export const QuranIcon = (
     <path
       fill="none"
       stroke="currentColor"
-      stroke-linecap="round"
-      stroke-linejoin="round"
+      strokeLinecap="round"
+      strokeLinejoin="round"
       d="M11.015 33.445v8.2L42.5 26.742V6.355L24 15.657L5.5 6.355v20.387l31.485 14.903v-8.2m-12.92-2.947V19.373"
-      stroke-width="3"
+      strokeWidth="3"
     />
   </svg>
 );
@@ -23,21 +23,16 @@ export const QuranIcon2 = (
     height="24"
     viewBox="0 0 25 24"
   >
-    <g
-      fill="none"
-      stroke="currentColor"
-      stroke-linecap="round"
-      stroke-width="1"
-    >
-      <path stroke-width="1.5" d="M21 17H6.5a2.5 2.5 0 0 0 0 5H21" />
+    <g fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1">
+      <path strokeWidth="1.5" d="M21 17H6.5a2.5 2.5 0 0 0 0 5H21" />
       <path
-        stroke-width="1.5"
+        strokeWidth="1.5"
         d="M21 22a2.5 2.5 0 0 1 0-5m-5.566-6A3.23 3.23 0 1 1 11 6.566"
       />
-      <path stroke-linejoin="round" stroke-width="2" d="M14 8h.009" />
+      <path strokeLinejoin="round" strokeWidth="2" d="M14 8h.009" />
       <path
-        stroke-linejoin="round"
-        stroke-width="1.5"
+        strokeLinejoin="round"
+        strokeWidth="1.5"
         d="M4 19.5v-14A3.5 3.5 0 0 1 7.5 2h10A3.5 3.5 0 0 1 21 5.5V17"
       />
     </g>

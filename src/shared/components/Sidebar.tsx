@@ -28,7 +28,6 @@ export default function Sidebar({ children }: { children: JSX.Element[] }) {
   const dispatch = useAppDispatch();
   const user = useAppSelector((state) => state.auth.user);
 
-  // Close menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -201,7 +200,7 @@ export function SidebarItem({
           <div
             className={`
               absolute left-full rounded-md px-2 py-1 ml-6
-              bg-indigo-100 text-indigo-800 text-sm
+              bg-indigo-100 text-indigo-800 text-sm w-[120px]
               invisible opacity-20 -translate-x-3 transition-all
               group-hover:visible group-hover:opacity-100 group-hover:translate-x-0
             `}
