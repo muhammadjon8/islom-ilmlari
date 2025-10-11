@@ -16,12 +16,6 @@ export default function DashboardLayout() {
     <div className="flex">
       <Sidebar>
         <SidebarItem
-          text="Kategoriyalar"
-          icon={<MenuIcon />}
-          active={location.pathname === "/kategoriyalar"}
-          href="/kategoriyalar"
-        />
-        <SidebarItem
           text="Qur'on Ilmi"
           icon={QuranIcon2}
           active={location.pathname === "/quron-ilmi"}
@@ -32,18 +26,6 @@ export default function DashboardLayout() {
           icon={QuranIcon}
           active={location.pathname === "/quron-tavsiri"}
           href="/quron-tavsiri"
-        />
-        <SidebarItem
-          text="Savollar"
-          icon={<FileQuestion />}
-          active={location.pathname === "/savollar"}
-          href="/savollar"
-        />
-        <SidebarItem
-          text="Yangiliklar"
-          icon={<Newspaper />}
-          active={location.pathname === "/yangiliklar"}
-          href="/yangiliklar"
         />
         <SidebarItem
           text="Duolar"
@@ -68,6 +50,24 @@ export default function DashboardLayout() {
           icon={<LightbulbIcon />}
           active={location.pathname === "/ilm"}
           href="/ilm"
+        />
+        <SidebarItem
+          text="Kategoriyalar"
+          icon={<MenuIcon />}
+          active={location.pathname === "/kategoriyalar"}
+          href="/kategoriyalar"
+        />
+        <SidebarItem
+          text="Savollar"
+          icon={<FileQuestion />}
+          active={location.pathname === "/savollar"}
+          href="/savollar"
+        />
+        <SidebarItem
+          text="Yangiliklar"
+          icon={<Newspaper />}
+          active={location.pathname === "/yangiliklar"}
+          href="/yangiliklar"
         />
       </Sidebar>
 
