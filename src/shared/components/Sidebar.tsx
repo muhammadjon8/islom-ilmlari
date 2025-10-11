@@ -1,16 +1,62 @@
-import { MoreVertical, ChevronLast, ChevronFirst } from "lucide-react";
-import { useContext, createContext, useState, type JSX } from "react";
-import { Link } from "react-router-dom";
+import {
+  MoreVertical,
+  ChevronLast,
+  ChevronFirst,
+  LogOut,
+  User,
+  Settings,
+} from "lucide-react";
+import {
+  useContext,
+  createContext,
+  useState,
+  useRef,
+  useEffect,
+  type JSX,
+} from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAppDispatch, useAppSelector } from "../../hooks/hook";
+import { logout } from "../../store/authSlice";
 
 const SidebarContext = createContext({ expanded: false });
 
 export default function Sidebar({ children }: { children: JSX.Element[] }) {
   const [expanded, setExpanded] = useState(true);
+  const [showMenu, setShowMenu] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+  const user = useAppSelector((state) => state.auth.user);
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setShowMenu(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleLogout = () => {
+    dispatch(logout());
+    navigate("/login");
+  };
+
+  const getInitials = (name: string) => {
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase();
+  };
 
   return (
     <aside
       className={`h-screen transition-all duration-300 ${
-        expanded ? "w-64" : "w-16"
+        expanded ? "w-72" : "w-16"
       }`}
     >
       <nav className="h-full flex flex-col bg-white border-r shadow-sm">
@@ -34,9 +80,11 @@ export default function Sidebar({ children }: { children: JSX.Element[] }) {
           <ul className="flex-1 px-3">{children}</ul>
         </SidebarContext.Provider>
 
-        <div className="border-t flex p-3">
+        <div className="border-t flex p-3 relative">
           <img
-            src="https://ui-avatars.com/api/?background=c7d2fe&color=3730a3&bold=true"
+            src={`https://ui-avatars.com/api/?name=${getInitials(
+              user?.full_name || "User"
+            )}&background=c7d2fe&color=3730a3&bold=true`}
             alt="avatar"
             className="w-10 h-10 rounded-md"
           />
@@ -46,11 +94,55 @@ export default function Sidebar({ children }: { children: JSX.Element[] }) {
             }`}
           >
             <div className="leading-4">
-              <h4 className="font-semibold">John Doe</h4>
-              <span className="text-xs text-gray-600">johndoe@gmail.com</span>
+              <h4 className="font-semibold">{user?.full_name || "User"}</h4>
+              <span className="text-xs text-gray-600">
+                {user?.email || "user@example.com"}
+              </span>
             </div>
-            <MoreVertical size={20} />
+            <button
+              onClick={() => setShowMenu(!showMenu)}
+              className="p-1 hover:bg-gray-100 rounded transition-colors"
+            >
+              <MoreVertical size={20} />
+            </button>
           </div>
+
+          {/* Dropdown Menu */}
+          {showMenu && expanded && (
+            <div
+              ref={menuRef}
+              className="absolute bottom-16 right-3 bg-white border rounded-lg shadow-lg py-2 w-48 z-50"
+            >
+              <button
+                onClick={() => {
+                  setShowMenu(false);
+                  navigate("/profile");
+                }}
+                className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+              >
+                <User size={16} />
+                <span>Profile</span>
+              </button>
+              <button
+                onClick={() => {
+                  setShowMenu(false);
+                  navigate("/settings");
+                }}
+                className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+              >
+                <Settings size={16} />
+                <span>Settings</span>
+              </button>
+              <hr className="my-2" />
+              <button
+                onClick={handleLogout}
+                className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+              >
+                <LogOut size={16} />
+                <span>Logout</span>
+              </button>
+            </div>
+          )}
         </div>
       </nav>
     </aside>
@@ -59,7 +151,7 @@ export default function Sidebar({ children }: { children: JSX.Element[] }) {
 
 type SidebarItemProps = {
   icon: JSX.Element;
-  text: string;
+  text: string;   
   active?: boolean;
   alert?: boolean;
   href: string;
