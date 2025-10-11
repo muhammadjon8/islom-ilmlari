@@ -1,6 +1,6 @@
-import { X } from "lucide-react";
+import { X, Upload, File, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
-
+import { deleteFile, getFileUrl, uploadFile, type FileData } from "../../apis/file-upload.api";
 export interface FormField {
   name: string;
   label: string;
@@ -11,12 +11,15 @@ export interface FormField {
     | "textarea"
     | "select"
     | "checkbox"
-    | "date";
+    | "date"
+    | "file";
   placeholder?: string;
   required?: boolean;
   options?: { label: string; value: string | number }[];
   fullWidth?: boolean;
   defaultValue?: any;
+  accept?: string; // For file input (e.g., "image/*" or ".pdf,.doc,.docx")
+  fileType?: "image" | "document"; // To determine preview behavior
 }
 
 interface FormModalProps {
@@ -28,7 +31,6 @@ interface FormModalProps {
   submitLabel?: string;
   initialData?: Record<string, any>;
 }
-
 const FormModal = ({
   isOpen,
   onClose,
@@ -41,6 +43,63 @@ const FormModal = ({
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [uploadingFiles, setUploadingFiles] = useState<Record<string, boolean>>(
+    {}
+  );
+  const [fileData, setFileData] = useState<Record<string, FileData>>({});
+  const handleChange = (name: string, value: any) => {
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (errors[name]) {
+      setErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
+  };
+
+  const handleFileUpload = async (fieldName: string, file: File) => {
+    setUploadingFiles((prev) => ({ ...prev, [fieldName]: true }));
+    setErrors((prev) => {
+      const newErrors = { ...prev };
+      delete newErrors[fieldName];
+      return newErrors;
+    });
+
+    try {
+      const uploadedFile = await uploadFile(file);
+      setFileData((prev) => ({ ...prev, [fieldName]: uploadedFile }));
+      setFormData((prev) => ({ ...prev, [fieldName]: uploadedFile.id }));
+    } catch (error: any) {
+      setErrors((prev) => ({
+        ...prev,
+        [fieldName]: error.response?.data?.message || "Failed to upload file",
+      }));
+    } finally {
+      setUploadingFiles((prev) => ({ ...prev, [fieldName]: false }));
+    }
+  };
+
+  const handleFileRemove = async (fieldName: string) => {
+    const fileId = formData[fieldName];
+    if (fileId && typeof fileId === "string") {
+      try {
+        await deleteFile(fileId);
+      } catch (error) {
+        console.error("Error deleting file:", error);
+      }
+    }
+    setFormData((prev) => {
+      const newData = { ...prev };
+      delete newData[fieldName];
+      return newData;
+    });
+    setFileData((prev) => {
+      const newData = { ...prev };
+      delete newData[fieldName];
+      return newData;
+    });
+  };
 
   useEffect(() => {
     if (isOpen) {
@@ -71,17 +130,6 @@ const FormModal = ({
       document.removeEventListener("keydown", handleEscape);
     };
   }, [isOpen, loading, onClose]);
-
-  const handleChange = (name: string, value: any) => {
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    if (errors[name]) {
-      setErrors((prev) => {
-        const newErrors = { ...prev };
-        delete newErrors[name];
-        return newErrors;
-      });
-    }
-  };
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
@@ -194,6 +242,72 @@ const FormModal = ({
                       <span className="ml-2 text-sm text-gray-600">
                         {field.placeholder}
                       </span>
+                    </div>
+                  ) : field.type === "file" ? (
+                    <div>
+                      {!formData[field.name] ? (
+                        <div className="flex items-center gap-2">
+                          <label
+                            htmlFor={field.name}
+                            className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 border-2 border-dashed rounded-lg cursor-pointer transition-colors ${
+                              uploadingFiles[field.name]
+                                ? "border-gray-300 bg-gray-50"
+                                : "border-gray-300 hover:border-blue-500 hover:bg-blue-50"
+                            }`}
+                          >
+                            <Upload size={20} />
+                            <span>
+                              {uploadingFiles[field.name]
+                                ? "Uploading..."
+                                : field.placeholder || "Choose file"}
+                            </span>
+                          </label>
+                          <input
+                            id={field.name}
+                            type="file"
+                            accept={field.accept}
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) handleFileUpload(field.name, file);
+                            }}
+                            className="hidden"
+                            disabled={loading || uploadingFiles[field.name]}
+                          />
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
+                          {field.fileType === "image" &&
+                          fileData[field.name]?.path ? (
+                            <img
+                              src={getFileUrl(fileData[field.name].path)}
+                              alt="Preview"
+                              className="w-16 h-16 object-cover rounded"
+                            />
+                          ) : (
+                            <File size={32} className="text-gray-400" />
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-gray-900 truncate">
+                              {fileData[field.name]?.file_name ||
+                                "File uploaded"}
+                            </p>
+                            {fileData[field.name]?.size && (
+                              <p className="text-xs text-gray-500">
+                                {(fileData[field.name].size / 1024).toFixed(2)}{" "}
+                                KB
+                              </p>
+                            )}
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleFileRemove(field.name)}
+                            className="p-2 text-red-600 hover:bg-red-50 rounded transition-colors"
+                            disabled={loading}
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      )}
                     </div>
                   ) : (
                     <input

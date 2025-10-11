@@ -14,6 +14,7 @@ import type { ViewField } from "../shared/components/ViewModal";
 import ViewModal from "../shared/components/ViewModal";
 import FormModal from "../shared/components/FormModal";
 import ConfirmModal from "../shared/components/ConfirmModal";
+import { getFileById, type FileData } from "../apis/file-upload.api";
 
 const columns: Column<Dua>[] = [
   { key: "title_en", label: "Title (EN)" },
@@ -83,6 +84,22 @@ const formFields: FormField[] = [
     placeholder: "Enter Arabic text",
     fullWidth: true,
   },
+  {
+    name: "file_id",
+    label: "Attachment",
+    type: "file",
+    placeholder: "Upload image or document",
+    accept: "image/*,.pdf,.doc,.docx",
+    fileType: "image",
+    fullWidth: true,
+  },
+  {
+    name: "is_active",
+    label: "Active Status",
+    type: "checkbox",
+    placeholder: "Is this dua active?",
+    defaultValue: true,
+  },
 ];
 
 const Duolar = () => {
@@ -96,6 +113,7 @@ const Duolar = () => {
   const [selectedDua, setSelectedDua] = useState<Dua | null>(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [fileData, setFileData] = useState<FileData | null>(null);
 
   const fetchDuolar = async () => {
     try {
@@ -115,10 +133,24 @@ const Duolar = () => {
     fetchDuolar();
   }, []);
 
-  const handleView = (row: Dua) => {
+  const handleView = async (row: Dua) => {
     setSelectedDua(row);
+
+    if (row.file_id) {
+      try {
+        const file = await getFileById(row.file_id);
+        setFileData(file);
+      } catch (error) {
+        console.error("Failed to fetch file data:", error);
+        setFileData(null);
+      }
+    } else {
+      setFileData(null);
+    }
+
     setViewModalOpen(true);
   };
+
 
   const handleEdit = (row: Dua) => {
     setSelectedDua(row);
@@ -168,30 +200,40 @@ const Duolar = () => {
     }
   };
 
-  const getViewFields = (dua: Dua): ViewField[] => [
-    { label: "ID", value: dua.id },
-    { label: "Title (English)", value: dua.title_en },
-    { label: "Title (Uzbek)", value: dua.title_uz },
-    { label: "Title (Russian)", value: dua.title_ru },
-    { label: "Title (Arabic)", value: dua.title_arab },
-    { label: "Text (English)", value: dua.text_en, fullWidth: true },
-    { label: "Text (Uzbek)", value: dua.text_uz, fullWidth: true },
-    { label: "Text (Russian)", value: dua.text_ru, fullWidth: true },
-    { label: "Text (Arabic)", value: dua.text_arab, fullWidth: true },
-    {
-      label: "Active",
-      value: dua.is_active,
-      render: (val) => (val ? "Yes" : "No"),
-    },
-    {
-      label: "Created At",
-      value: new Date(parseInt(dua.created_at)).toLocaleString(),
-    },
-    {
-      label: "Updated At",
-      value: new Date(parseInt(dua.updated_at)).toLocaleString(),
-    },
-  ];
+  const getViewFields = (dua: Dua): ViewField[] => {
+    const fields: ViewField[] = [
+      { label: "ID", value: dua.id },
+      { label: "Title (English)", value: dua.title_en },
+      { label: "Title (Uzbek)", value: dua.title_uz },
+      { label: "Title (Russian)", value: dua.title_ru },
+      { label: "Title (Arabic)", value: dua.title_arab },
+      { label: "Text (English)", value: dua.text_en, fullWidth: true },
+      { label: "Text (Uzbek)", value: dua.text_uz, fullWidth: true },
+      { label: "Text (Russian)", value: dua.text_ru, fullWidth: true },
+      { label: "Text (Arabic)", value: dua.text_arab, fullWidth: true },
+    ];
+
+    // Add file field if file exists
+    if (dua.file_id && fileData) {
+      fields.push({
+        label: "Attachment",
+        value: fileData.file_name,
+        isFile: true,
+        fileId: dua.file_id,
+        filePath: fileData.path,
+        fileName: fileData.file_name,
+        fullWidth: true,
+      });
+    }
+
+    fields.push(
+      { label: "Active", value: dua.is_active, render: (val) => (val ? "Yes" : "No") },
+      { label: "Created At", value: new Date(parseInt(dua.created_at)).toLocaleString() },
+      { label: "Updated At", value: new Date(parseInt(dua.updated_at)).toLocaleString() }
+    );
+
+    return fields;
+  };
 
   if (loading) {
     return (

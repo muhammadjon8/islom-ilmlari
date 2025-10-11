@@ -1,11 +1,16 @@
-import { X } from "lucide-react";
+import { X, Download } from "lucide-react";
 import { useEffect } from "react";
+import { downloadFile, getFileUrl } from "../../apis/file-upload.api";
 
 export interface ViewField {
   label: string;
   value: string | number | boolean | null | undefined;
   render?: (value: any) => React.ReactNode;
   fullWidth?: boolean;
+  isFile?: boolean;
+  filePath?: string;
+  fileName?: string;
+  fileId?: string;
 }
 
 interface ViewModalProps {
@@ -41,6 +46,15 @@ const ViewModal = ({ isOpen, onClose, title, fields }: ViewModalProps) => {
     return String(value);
   };
 
+  const handleDownload = async (fileId: string, fileName: string) => {
+    try {
+      await downloadFile(fileId, fileName);
+    } catch (error) {
+      console.error("Download failed:", error);
+      alert("Failed to download file");
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="absolute inset-0 bg-gray-900/50" onClick={onClose} />
@@ -69,9 +83,42 @@ const ViewModal = ({ isOpen, onClose, title, fields }: ViewModalProps) => {
                   {field.label}
                 </label>
                 <div className="text-base text-gray-900 break-words">
-                  {field.render
-                    ? field.render(field.value)
-                    : formatValue(field.value)}
+                  {field.isFile && field.fileId ? (
+                    <div className="flex items-center gap-3">
+                      {field.filePath &&
+                      (field.filePath.match(/\.(jpg|jpeg|png|gif|webp)$/i) ||
+                        field.fileName?.match(
+                          /\.(jpg|jpeg|png|gif|webp)$/i
+                        )) ? (
+                        <img
+                          src={getFileUrl(field.filePath)}
+                          alt={field.fileName || "File"}
+                          className="w-24 h-24 object-cover rounded border"
+                        />
+                      ) : null}
+                      <div className="flex-1">
+                        <p className="text-sm font-medium">
+                          {field.fileName || "File attached"}
+                        </p>
+                        <button
+                          onClick={() =>
+                            handleDownload(
+                              field.fileId!,
+                              field.fileName || "download"
+                            )
+                          }
+                          className="mt-2 flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800 transition-colors"
+                        >
+                          <Download size={16} />
+                          Download File
+                        </button>
+                      </div>
+                    </div>
+                  ) : field.render ? (
+                    field.render(field.value)
+                  ) : (
+                    formatValue(field.value)
+                  )}
                 </div>
               </div>
             ))}
