@@ -16,8 +16,19 @@ interface AuthState {
   isAuthenticated: boolean;
 }
 
+// Helper function to safely parse user from localStorage
+const getUserFromStorage = (): User | null => {
+  try {
+    const userStr = localStorage.getItem("user");
+    return userStr ? JSON.parse(userStr) : null;
+  } catch (error) {
+    console.error("Error parsing user from localStorage:", error);
+    return null;
+  }
+};
+
 const initialState: AuthState = {
-  user: null,
+  user: getUserFromStorage(),
   accessToken: localStorage.getItem("access_token"),
   refreshToken: localStorage.getItem("refresh_token"),
   isAuthenticated: !!localStorage.getItem("access_token"),
@@ -41,6 +52,7 @@ const authSlice = createSlice({
       state.refreshToken = refreshToken;
       state.isAuthenticated = true;
 
+      // Store tokens and user in localStorage
       localStorage.setItem("access_token", accessToken);
       localStorage.setItem("refresh_token", refreshToken);
       localStorage.setItem("user", JSON.stringify(user));
@@ -51,6 +63,7 @@ const authSlice = createSlice({
       state.refreshToken = null;
       state.isAuthenticated = false;
 
+      // Clear tokens and user from localStorage
       localStorage.removeItem("access_token");
       localStorage.removeItem("refresh_token");
       localStorage.removeItem("user");
@@ -63,4 +76,4 @@ const authSlice = createSlice({
 });
 
 export const { setCredentials, logout, updateAccessToken } = authSlice.actions;
-export default authSlice;
+export default authSlice.reducer;
