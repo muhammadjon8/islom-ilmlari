@@ -1,6 +1,7 @@
-import { X, Download } from "lucide-react";
+import { X, EyeIcon } from "lucide-react";
 import { useEffect } from "react";
 import { downloadFile, getFileUrl } from "../../apis/file-upload.api";
+import { toast } from "sonner";
 
 export interface ViewField {
   label: string;
@@ -46,12 +47,12 @@ const ViewModal = ({ isOpen, onClose, title, fields }: ViewModalProps) => {
     return String(value);
   };
 
-  const handleDownload = async (fileId: string, fileName: string) => {
+  const handleDownload = async (filePath: string) => {
     try {
-      await downloadFile(fileId, fileName);
+      await downloadFile(filePath);
     } catch (error) {
       console.error("Download failed:", error);
-      alert("Failed to download file");
+      toast.error("Failed to download file");
     }
   };
 
@@ -84,7 +85,7 @@ const ViewModal = ({ isOpen, onClose, title, fields }: ViewModalProps) => {
                 </label>
                 <div className="text-base text-gray-900 break-words">
                   {field.isFile && field.fileId ? (
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 flex-col">
                       {field.filePath &&
                       (field.filePath.match(/\.(jpg|jpeg|png|gif|webp)$/i) ||
                         field.fileName?.match(
@@ -93,7 +94,7 @@ const ViewModal = ({ isOpen, onClose, title, fields }: ViewModalProps) => {
                         <img
                           src={getFileUrl(field.filePath)}
                           alt={field.fileName || "File"}
-                          className="w-24 h-24 object-cover rounded border"
+                          className="max-w-2xl max-h-20 object-cover rounded border"
                         />
                       ) : null}
                       <div className="flex-1">
@@ -102,15 +103,12 @@ const ViewModal = ({ isOpen, onClose, title, fields }: ViewModalProps) => {
                         </p>
                         <button
                           onClick={() =>
-                            handleDownload(
-                              field.fileId!,
-                              field.fileName || "download"
-                            )
+                            handleDownload(field.filePath || "download")
                           }
                           className="mt-2 flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800 transition-colors"
                         >
-                          <Download size={16} />
-                          Download File
+                          <EyeIcon size={16} />
+                          View File
                         </button>
                       </div>
                     </div>

@@ -15,6 +15,8 @@ import ViewModal from "../shared/components/ViewModal";
 import FormModal from "../shared/components/FormModal";
 import ConfirmModal from "../shared/components/ConfirmModal";
 import { getFileById, type FileData } from "../apis/file-upload.api";
+import LoadingScreen from "../components/Loading";
+import { toast } from "sonner";
 
 const columns: Column<Dua>[] = [
   { key: "title_en", label: "Title (EN)" },
@@ -93,13 +95,6 @@ const formFields: FormField[] = [
     fileType: "image",
     fullWidth: true,
   },
-  {
-    name: "is_active",
-    label: "Active Status",
-    type: "checkbox",
-    placeholder: "Is this dua active?",
-    defaultValue: true,
-  },
 ];
 
 const Duolar = () => {
@@ -134,6 +129,7 @@ const Duolar = () => {
   }, []);
 
   const handleView = async (row: Dua) => {
+    setViewModalOpen(true);
     setSelectedDua(row);
 
     if (row.file_id) {
@@ -147,10 +143,7 @@ const Duolar = () => {
     } else {
       setFileData(null);
     }
-
-    setViewModalOpen(true);
   };
-
 
   const handleEdit = (row: Dua) => {
     setSelectedDua(row);
@@ -175,9 +168,10 @@ const Duolar = () => {
     setDeleteLoading(true);
     try {
       await deleteDua(selectedDua.id);
+      toast.success("Dua deleted successfully");
       setDuolar((prev) => prev.filter((dua) => dua.id !== selectedDua.id));
     } catch (err: any) {
-      alert(err.response?.data?.message || "Failed to delete dua");
+      toast.error(err.response?.data?.message || "Failed to delete dua");
     } finally {
       setDeleteLoading(false);
     }
@@ -188,14 +182,14 @@ const Duolar = () => {
       if (isEditMode && selectedDua) {
         await updateDua(selectedDua.id, data);
         await fetchDuolar();
-        alert("Dua updated successfully");
+        toast.success("Dua updated successfully");
       } else {
         await createDua(data as any);
         await fetchDuolar();
-        alert("Dua created successfully");
+        toast.success("Dua created successfully");
       }
     } catch (err: any) {
-      alert(err.response?.data?.message || "Failed to save dua");
+      toast.error(err.response?.data?.message || "Failed to save dua");
       throw err;
     }
   };
@@ -227,24 +221,27 @@ const Duolar = () => {
     }
 
     fields.push(
-      { label: "Active", value: dua.is_active, render: (val) => (val ? "Yes" : "No") },
-      { label: "Created At", value: new Date(parseInt(dua.created_at)).toLocaleString() },
-      { label: "Updated At", value: new Date(parseInt(dua.updated_at)).toLocaleString() }
+      {
+        label: "Active",
+        value: dua.is_active,
+        render: (val) => (val ? "Yes" : "No"),
+      },
+      {
+        label: "Created At",
+        value: new Date(parseInt(dua.created_at)).toLocaleString(),
+      },
+      {
+        label: "Updated At",
+        value: new Date(parseInt(dua.updated_at)).toLocaleString(),
+      }
     );
 
     return fields;
   };
 
   if (loading) {
-    return (
-      <div className="p-6">
-        <div className="flex items-center justify-center h-64">
-          <div className="text-gray-600">Loading duas...</div>
-        </div>
-      </div>
-    );
+    return <LoadingScreen />;
   }
-
   if (error) {
     return (
       <div className="p-6">

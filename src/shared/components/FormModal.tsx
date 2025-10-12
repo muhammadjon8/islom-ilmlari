@@ -1,6 +1,12 @@
 import { X, Upload, File, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { deleteFile, getFileUrl, uploadFile, type FileData } from "../../apis/file-upload.api";
+import {
+  deleteFile,
+  getFileById,
+  getFileUrl,
+  uploadFile,
+  type FileData,
+} from "../../apis/file-upload.api";
 export interface FormField {
   name: string;
   label: string;
@@ -109,6 +115,30 @@ const FormModal = ({
       }, {} as Record<string, any>);
       setFormData(initial);
       setErrors({});
+
+      // Fetch file data for existing files
+      const fetchExistingFiles = async () => {
+        const fileFields = fields.filter((f) => f.type === "file");
+        const newFileData: Record<string, FileData> = {};
+
+        for (const field of fileFields) {
+          const fileId = initialData[field.name];
+          if (fileId && typeof fileId === "string") {
+            try {
+              const file = await getFileById(fileId);
+              newFileData[field.name] = file;
+            } catch (error) {
+              console.error(`Failed to fetch file for ${field.name}:`, error);
+            }
+          }
+        }
+
+        if (Object.keys(newFileData).length > 0) {
+          setFileData(newFileData);
+        }
+      };
+
+      fetchExistingFiles();
       document.body.style.overflow = "hidden";
     }
 

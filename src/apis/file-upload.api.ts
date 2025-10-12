@@ -51,28 +51,17 @@ export const deleteFile = async (id: string): Promise<void> => {
   await axiosInstance.delete(`/file/${id}`);
 };
 
-export const downloadFile = async (
-  id: string,
-  filename: string
-): Promise<void> => {
-  const response = await axiosInstance.get(`/file/download/${id}`, {
-    responseType: "blob",
-  });
-
-  // Create a blob URL and trigger download
-  const blob = new Blob([response.data]);
-  const url = window.URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = filename;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  window.URL.revokeObjectURL(url);
+const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+export const downloadFile = async (filePath: string): Promise<void> => {
+  try {
+    window.open(`${BASE_URL}/upload/${filePath}`, "_blank");
+  } catch (error: any) {
+    console.error("Download error:", error.response?.data || error.message);
+  }
 };
 
 // Helper to get full file URL for preview
 export const getFileUrl = (path: string): string => {
   const baseUrl = import.meta.env.VITE_API_BASE_URL;
-  return `${baseUrl}/file/${path}`;
+  return `${baseUrl}/upload/${path}`;
 };
