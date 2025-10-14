@@ -1,6 +1,6 @@
 import { createApi } from "./base.api";
 
-export interface Dua {
+export interface QuranTavsiri {
   id: string;
   is_active: boolean;
   is_deleted: boolean;
@@ -16,5 +16,7 @@ export interface Dua {
   text_en: string;
   text_arab: string;
   file_id: string;
+  bob_id: string;
 }
-export const duasApi = createApi<Dua>("duas");
+
+export const quranTavsiriAPi = createApi<QuranTavsiri>("quran-tavsiri");

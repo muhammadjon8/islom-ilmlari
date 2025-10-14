@@ -14,10 +14,10 @@ import { Savollar } from "../pages/Savollar";
 import { Ilm } from "../pages/Ilm";
 import { Yangiliklar } from "../pages/Yangliklar";
 import { HadishSharhlari } from "../pages/HadisSharhlari";
-import { Kategoriyalar } from "../pages/Kategoriyalar";
 import { HajAmallari } from "../pages/HajAmallari";
 import NotFound from "../components/NotFound";
 import Duolar from "../pages/Duolar";
+import Kategoriyalar from "../pages/Kategoriyalar";
 
 const routes = createBrowserRouter(
   createRoutesFromElements(
@@ -34,7 +34,7 @@ const routes = createBrowserRouter(
           </ProtectedRoute>
         }
       >
-        <Route index element={<Navigate to="/home" replace />} />
+        <Route index element={<Navigate to="/" replace />} />
         <Route path="quron-ilmi" element={<QuronIlmi />} />
         <Route path="quron-tavsiri" element={<QuronTavsiri />} />
         <Route path="duolar" element={<Duolar />} />
