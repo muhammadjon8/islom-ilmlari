@@ -2,13 +2,7 @@ import { Edit, EyeIcon, Trash, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import Table from "../components/table/Table";
 import type { Column } from "../types/table.type";
-import {
-  createDua,
-  deleteDua,
-  getDuolar,
-  updateDua,
-  type Dua,
-} from "../apis/duas-api";
+import { duasApi, type Dua } from "../apis/duas-api";
 import type { FormField } from "../shared/components/FormModal";
 import type { ViewField } from "../shared/components/ViewModal";
 import ViewModal from "../shared/components/ViewModal";
@@ -19,78 +13,78 @@ import LoadingScreen from "../components/Loading";
 import { toast } from "sonner";
 
 const columns: Column<Dua>[] = [
-  { key: "title_en", label: "Title (EN)" },
-  { key: "title_uz", label: "Title (UZ)" },
-  { key: "title_ru", label: "Title (RU)" },
-  { key: "title_arab", label: "Title (Arab)" },
+  { key: "title_en", label: "Sarlavha (EN)" },
+  { key: "title_uz", label: "Sarlavha (UZ)" },
+  { key: "title_ru", label: "Sarlavha (RU)" },
+  { key: "title_arab", label: "Sarlavha (Arab)" },
 ];
 
 const formFields: FormField[] = [
   {
     name: "title_en",
-    label: "Title (English)",
+    label: "Sarlavha (Inglizcha)",
     type: "text",
     required: true,
-    placeholder: "Enter English title",
+    placeholder: "Inglizcha sarlavha kiriting...",
   },
   {
     name: "title_uz",
-    label: "Title (Uzbek)",
+    label: "Sarlavha (O'zbekcha)",
     type: "text",
     required: true,
-    placeholder: "Enter Uzbek title",
+    placeholder: "O'zbekcha sarlavha kiriting...",
   },
   {
     name: "title_ru",
-    label: "Title (Russian)",
+    label: "Sarlavha (Ruscha)",
     type: "text",
     required: true,
-    placeholder: "Enter Russian title",
+    placeholder: "Ruscha sarlavha kiriting...",
   },
   {
     name: "title_arab",
-    label: "Title (Arabic)",
+    label: "Sarlavha (Arabcha)",
     type: "text",
     required: true,
-    placeholder: "Enter Arabic title",
+    placeholder: "Arabcha sarlavha kiriting...",
   },
   {
     name: "text_en",
-    label: "Text (English)",
+    label: "Matn (Inglizcha)",
     type: "textarea",
-    required: true,
-    placeholder: "Enter English text",
+    required: false,
+    placeholder: "Inglizcha matn kiriting...",
     fullWidth: true,
   },
   {
     name: "text_uz",
-    label: "Text (Uzbek)",
+    label: "Matn (O'zbekcha)",
     type: "textarea",
-    required: true,
-    placeholder: "Enter Uzbek text",
+    required: false,
+    placeholder: "O'zbekcha matn kiriting",
     fullWidth: true,
   },
   {
     name: "text_ru",
-    label: "Text (Russian)",
+    label: "Matn (Ruscha)",
     type: "textarea",
-    required: true,
-    placeholder: "Enter Russian text",
+    required: false,
+    placeholder: "Ruscha matn kiriting...",
     fullWidth: true,
   },
   {
     name: "text_arab",
-    label: "Text (Arabic)",
+    label: "Matn (Arabcha)",
     type: "textarea",
-    required: true,
-    placeholder: "Enter Arabic text",
+    required: false,
+    placeholder: "Arabcha matn kiriting...",
     fullWidth: true,
   },
   {
     name: "file_id",
-    label: "Attachment",
+    label: "Yuklanmalar",
     type: "file",
-    placeholder: "Upload image or document",
+    placeholder: "Rasm yoki fayl kiriting",
     accept: "image/*,.pdf,.doc,.docx",
     fileType: "image",
     fullWidth: true,
@@ -109,12 +103,13 @@ const Duolar = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [fileData, setFileData] = useState<FileData | null>(null);
+  const {create, remove, update, getAll, getById} = duasApi
 
   const fetchDuolar = async () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await getDuolar();
+      const data = await getAll();
       setDuolar(data);
     } catch (err: any) {
       setError(err.response?.data?.message || "Failed to fetch duas");
@@ -167,7 +162,7 @@ const Duolar = () => {
 
     setDeleteLoading(true);
     try {
-      await deleteDua(selectedDua.id);
+      await remove(selectedDua.id);
       toast.success("Dua deleted successfully");
       setDuolar((prev) => prev.filter((dua) => dua.id !== selectedDua.id));
     } catch (err: any) {
@@ -180,11 +175,11 @@ const Duolar = () => {
   const handleFormSubmit = async (data: Record<string, any>) => {
     try {
       if (isEditMode && selectedDua) {
-        await updateDua(selectedDua.id, data);
+        await update(selectedDua.id, data);
         await fetchDuolar();
         toast.success("Dua updated successfully");
       } else {
-        await createDua(data as any);
+        await create(data as any);
         await fetchDuolar();
         toast.success("Dua created successfully");
       }
@@ -197,20 +192,20 @@ const Duolar = () => {
   const getViewFields = (dua: Dua): ViewField[] => {
     const fields: ViewField[] = [
       { label: "ID", value: dua.id },
-      { label: "Title (English)", value: dua.title_en },
-      { label: "Title (Uzbek)", value: dua.title_uz },
-      { label: "Title (Russian)", value: dua.title_ru },
-      { label: "Title (Arabic)", value: dua.title_arab },
-      { label: "Text (English)", value: dua.text_en, fullWidth: true },
-      { label: "Text (Uzbek)", value: dua.text_uz, fullWidth: true },
-      { label: "Text (Russian)", value: dua.text_ru, fullWidth: true },
-      { label: "Text (Arabic)", value: dua.text_arab, fullWidth: true },
+      { label: "Sarlavha (Inglizcha)", value: dua.title_en },
+      { label: "Sarlavha (O'zbekcha)", value: dua.title_uz },
+      { label: "Sarlavha (Ruscha)", value: dua.title_ru },
+      { label: "Sarlavha (Arabcha)", value: dua.title_arab },
+      { label: "Matn (Inglizcha)", value: dua.text_en, fullWidth: true },
+      { label: "Matn (O'zbekcha)", value: dua.text_uz, fullWidth: true },
+      { label: "Matn (Ruscha)", value: dua.text_ru, fullWidth: true },
+      { label: "Matn (Arabcha)", value: dua.text_arab, fullWidth: true },
     ];
 
     // Add file field if file exists
     if (dua.file_id && fileData) {
       fields.push({
-        label: "Attachment",
+        label: "Yuklanmalar",
         value: fileData.file_name,
         isFile: true,
         fileId: dua.file_id,
@@ -227,11 +222,11 @@ const Duolar = () => {
         render: (val) => (val ? "Yes" : "No"),
       },
       {
-        label: "Created At",
+        label: "Yaratilgan vaqti",
         value: new Date(parseInt(dua.created_at)).toLocaleString(),
       },
       {
-        label: "Updated At",
+        label: "Yangilangan vaqti",
         value: new Date(parseInt(dua.updated_at)).toLocaleString(),
       }
     );
@@ -258,10 +253,10 @@ const Duolar = () => {
         <h1 className="text-xl font-semibold">Duolar</h1>
         <button
           onClick={handleAdd}
-          className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
+          className="flex items-center gap-2 bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600 transition-colors cursor-pointer"
         >
           <Plus size={20} />
-          Add New Dua
+          Yangi duo qo'shish
         </button>
       </div>
 
@@ -296,7 +291,7 @@ const Duolar = () => {
         <ViewModal
           isOpen={viewModalOpen}
           onClose={() => setViewModalOpen(false)}
-          title={`View Dua: ${selectedDua.title_en}`}
+          title={`Duoni ko'rish: ${selectedDua.title_en}`}
           fields={getViewFields(selectedDua)}
         />
       )}
@@ -305,10 +300,10 @@ const Duolar = () => {
           isOpen={confirmModalOpen}
           onClose={() => setConfirmModalOpen(false)}
           onConfirm={confirmDelete}
-          title="Delete Dua"
-          message={`Are you sure you want to delete "${selectedDua.title_en}"? This action cannot be undone.`}
-          confirmLabel="Delete"
-          cancelLabel="Cancel"
+          title="Duoni o'chirish"
+          message={`Bo duo o'chirilmoqda: "${selectedDua.title_en}"? O'chirishni tasdiqlang.`}
+          confirmLabel="O'chirish"
+          cancelLabel="Bekor qilish"
           type="danger"
           loading={deleteLoading}
         />
@@ -318,10 +313,10 @@ const Duolar = () => {
       <FormModal
         isOpen={formModalOpen}
         onClose={() => setFormModalOpen(false)}
-        title={isEditMode ? "Edit Dua" : "Add New Dua"}
+        title={isEditMode ? "Duoni yangilash" : "Yangi duo qo'shish"}
         fields={formFields}
         onSubmit={handleFormSubmit}
-        submitLabel={isEditMode ? "Update" : "Create"}
+        submitLabel={isEditMode ? "Yangilash" : "Yaratish"}
         initialData={selectedDua || {}}
       />
     </div>

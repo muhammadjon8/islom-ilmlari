@@ -40,7 +40,7 @@ function Table<T>({
                 {col.label}
               </th>
             ))}
-            {actions && <th className="p-2 border-b text-right">Actions</th>}
+            {actions && <th className="p-2 border-b text-right">Amallar</th>}
           </tr>
         </thead>
         <tbody>
@@ -80,7 +80,7 @@ function Table<T>({
                 colSpan={columns.length + (actions ? 1 : 0)}
                 className="text-center py-3 text-gray-500"
               >
-                No results found
+                Natijalar topilmadi
               </td>
             </tr>
           )}
