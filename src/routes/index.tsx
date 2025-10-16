@@ -10,7 +10,6 @@ import LoginPage from "../pages/Login";
 import ProtectedRoute from "./protected";
 import { QuronIlmi } from "../pages/QuronIlmi";
 import { QuronTavsiri } from "../pages/QuronTavsiri";
-import { Savollar } from "../pages/Savollar";
 import { Ilm } from "../pages/Ilm";
 import { Yangiliklar } from "../pages/Yangliklar";
 import { HadishSharhlari } from "../pages/HadisSharhlari";
@@ -18,6 +17,7 @@ import { HajAmallari } from "../pages/HajAmallari";
 import NotFound from "../components/NotFound";
 import Duolar from "../pages/Duolar";
 import Kategoriyalar from "../pages/Kategoriyalar";
+import Savollar from "../pages/Savollar";
 
 const routes = createBrowserRouter(
   createRoutesFromElements(

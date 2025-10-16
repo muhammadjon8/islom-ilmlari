@@ -45,7 +45,7 @@ export interface PaginatedQuestionsResponse<T> {
   message: string;
 }
 
-export const questionApi = {
+export const questionsApi = {
   ...createApi<Question>("questions"),
 
   async createMultiple(data: CreateMultipleQuestionsDto): Promise<Question[]> {

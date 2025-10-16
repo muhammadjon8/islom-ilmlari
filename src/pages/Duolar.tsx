@@ -103,7 +103,7 @@ const Duolar = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [fileData, setFileData] = useState<FileData | null>(null);
-  const {create, remove, update, getAll, getById} = duasApi
+  const {create, remove, update, getAll} = duasApi
 
   const fetchDuolar = async () => {
     try {
