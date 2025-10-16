@@ -1,5 +1,5 @@
-import { X, Upload, File, Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { X, Upload, File, Trash2, ChevronDown, Check } from "lucide-react";
+import { useEffect, useState, useRef } from "react";
 import {
   deleteFile,
   getFileById,
@@ -7,6 +7,7 @@ import {
   uploadFile,
   type FileData,
 } from "../../apis/file-upload.api";
+
 export interface FormField {
   name: string;
   label: string;
@@ -18,14 +19,15 @@ export interface FormField {
     | "select"
     | "checkbox"
     | "date"
-    | "file";
+    | "file"
+    | "searchable-select";
   placeholder?: string;
   required?: boolean;
   options?: { label: string; value: string | number }[];
   fullWidth?: boolean;
   defaultValue?: any;
-  accept?: string; // For file input (e.g., "image/*" or ".pdf,.doc,.docx")
-  fileType?: "image" | "document"; // To determine preview behavior
+  accept?: string;
+  fileType?: "image" | "document";
 }
 
 interface FormModalProps {
@@ -37,6 +39,7 @@ interface FormModalProps {
   submitLabel?: string;
   initialData?: Record<string, any>;
 }
+
 const FormModal = ({
   isOpen,
   onClose,
@@ -53,6 +56,11 @@ const FormModal = ({
     {}
   );
   const [fileData, setFileData] = useState<Record<string, FileData>>({});
+  const [searchableSelectStates, setSearchableSelectStates] = useState<
+    Record<string, { isOpen: boolean; searchTerm: string }>
+  >({});
+  const dropdownRefs = useRef<Record<string, HTMLDivElement | null>>({});
+
   const handleChange = (name: string, value: any) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
     if (errors[name]) {
@@ -62,6 +70,37 @@ const FormModal = ({
         return newErrors;
       });
     }
+  };
+
+  const toggleSearchableSelect = (fieldName: string) => {
+    setSearchableSelectStates((prev) => ({
+      ...prev,
+      [fieldName]: {
+        searchTerm: prev[fieldName]?.searchTerm || "",
+        isOpen: !prev[fieldName]?.isOpen,
+      },
+    }));
+  };
+
+  const setSearchTerm = (fieldName: string, term: string) => {
+    setSearchableSelectStates((prev) => ({
+      ...prev,
+      [fieldName]: {
+        ...prev[fieldName],
+        searchTerm: term,
+      },
+    }));
+  };
+
+  const selectOption = (fieldName: string, value: string | number) => {
+    handleChange(fieldName, value);
+    setSearchableSelectStates((prev) => ({
+      ...prev,
+      [fieldName]: {
+        searchTerm: "",
+        isOpen: false,
+      },
+    }));
   };
 
   const handleFileUpload = async (fieldName: string, file: File) => {
@@ -115,6 +154,7 @@ const FormModal = ({
       }, {} as Record<string, any>);
       setFormData(initial);
       setErrors({});
+      setSearchableSelectStates({});
 
       // Fetch file data for existing files
       const fetchExistingFiles = async () => {
@@ -146,6 +186,32 @@ const FormModal = ({
       document.body.style.overflow = "unset";
     };
   }, [isOpen, fields, initialData]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      Object.keys(dropdownRefs.current).forEach((fieldName) => {
+        const ref = dropdownRefs.current[fieldName];
+        if (
+          ref &&
+          !ref.contains(event.target as Node) &&
+          searchableSelectStates[fieldName]?.isOpen
+        ) {
+          setSearchableSelectStates((prev) => ({
+            ...prev,
+            [fieldName]: { ...prev[fieldName], isOpen: false },
+          }));
+        }
+      });
+    };
+
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isOpen, searchableSelectStates]);
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -272,6 +338,118 @@ const FormModal = ({
                       <span className="ml-2 text-sm text-gray-600">
                         {field.placeholder}
                       </span>
+                    </div>
+                  ) : field.type === "searchable-select" ? (
+                    <div
+                      ref={(el: HTMLDivElement) => {
+                        if (dropdownRefs.current[field.name] === null) {
+                          dropdownRefs.current[field.name] = el;
+                        } else {
+                          console.warn(
+                            `Ref for field ${field.name} already exists.`
+                          );
+                        }
+                      }}
+                      className="relative"
+                    >
+                      <button
+                        type="button"
+                        onClick={() => toggleSearchableSelect(field.name)}
+                        className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center justify-between ${
+                          errors[field.name]
+                            ? "border-red-500"
+                            : "border-gray-300"
+                        }`}
+                        disabled={loading}
+                      >
+                        <span
+                          className={
+                            formData[field.name]
+                              ? "text-gray-900"
+                              : "text-gray-400"
+                          }
+                        >
+                          {formData[field.name]
+                            ? field.options?.find(
+                                (opt) => opt.value === formData[field.name]
+                              )?.label
+                            : field.placeholder || "Select..."}
+                        </span>
+                        <ChevronDown
+                          size={16}
+                          className={`transition-transform ${
+                            searchableSelectStates[field.name]?.isOpen
+                              ? "rotate-180"
+                              : ""
+                          }`}
+                        />
+                      </button>
+
+                      {searchableSelectStates[field.name]?.isOpen && (
+                        <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-hidden">
+                          <div className="p-2 border-b">
+                            <input
+                              type="text"
+                              value={
+                                searchableSelectStates[field.name]
+                                  ?.searchTerm || ""
+                              }
+                              onChange={(e) =>
+                                setSearchTerm(field.name, e.target.value)
+                              }
+                              placeholder="Qidirish..."
+                              className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              autoFocus
+                            />
+                          </div>
+                          <div className="overflow-y-auto max-h-48">
+                            {field.options
+                              ?.filter((option) =>
+                                option.label
+                                  .toLowerCase()
+                                  .includes(
+                                    (
+                                      searchableSelectStates[field.name]
+                                        ?.searchTerm || ""
+                                    ).toLowerCase()
+                                  )
+                              )
+                              .map((option) => (
+                                <button
+                                  key={option.value}
+                                  type="button"
+                                  onClick={() =>
+                                    selectOption(field.name, option.value)
+                                  }
+                                  className={`w-full px-3 py-2 text-left hover:bg-blue-50 flex items-center justify-between ${
+                                    formData[field.name] === option.value
+                                      ? "bg-blue-50 text-blue-600"
+                                      : "text-gray-900"
+                                  }`}
+                                >
+                                  <span>{option.label}</span>
+                                  {formData[field.name] === option.value && (
+                                    <Check size={16} />
+                                  )}
+                                </button>
+                              ))}
+                            {field.options?.filter((option) =>
+                              option.label
+                                .toLowerCase()
+                                .includes(
+                                  (
+                                    searchableSelectStates[field.name]
+                                      ?.searchTerm || ""
+                                  ).toLowerCase()
+                                )
+                            ).length === 0 && (
+                              <div className="px-3 py-2 text-gray-500 text-center">
+                                Natija topilmadi
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   ) : field.type === "file" ? (
                     <div>
