@@ -1,4 +1,3 @@
-// src/components/Table/Table.tsx
 import { useState, useMemo } from "react";
 import TablePagination from "./TablePagination";
 import TableFilter from "./TableFilter";
@@ -9,7 +8,7 @@ function Table<T>({
   data,
   actions,
   filterKey,
-  itemsPerPage = 5,
+  itemsPerPage = 20,
 }: TableProps<T>) {
   const [filter, setFilter] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -58,7 +57,7 @@ function Table<T>({
                   </td>
                 ))}
                 {actions && (
-                  <td className="p-2 border-b border-gray-100 text-right space-x-2">
+                  <td className="flex items-center justify-center space-x-1 p-2">
                     {actions.map((action) => (
                       <button
                         key={action.label}

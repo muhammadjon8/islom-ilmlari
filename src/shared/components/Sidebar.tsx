@@ -54,11 +54,12 @@ export default function Sidebar({ children }: { children: JSX.Element[] }) {
 
   return (
     <aside
-      className={`h-screen transition-all duration-300 ${
+      className={`h-full transition-all duration-300 ${
         expanded ? "w-72" : "w-16"
       }`}
     >
-      <nav className="h-full flex flex-col bg-white border-r shadow-sm">
+      <nav className="h-screen flex flex-col bg-white border-r shadow-sm">
+        {/* Header */}
         <div className="p-4 pb-2 flex justify-between items-center">
           <img
             src="https://img.logoipsum.com/243.svg"
@@ -75,35 +76,40 @@ export default function Sidebar({ children }: { children: JSX.Element[] }) {
           </button>
         </div>
 
+        {/* Sidebar items (scrollable area) */}
         <SidebarContext.Provider value={{ expanded }}>
-          <ul className="flex-1 px-3">{children}</ul>
+          <ul className="flex-1 px-3 overflow-y-auto">{children}</ul>
         </SidebarContext.Provider>
 
-        <div className="border-t flex p-3 relative">
-          <img
-            src={`https://ui-avatars.com/api/?name=${getInitials(
-              user?.full_name || "User"
-            )}&background=c7d2fe&color=3730a3&bold=true`}
-            alt="avatar"
-            className="w-10 h-10 rounded-md"
-          />
-          <div
-            className={`flex justify-between items-center overflow-hidden transition-all ${
-              expanded ? "w-52 ml-3" : "w-0"
-            }`}
-          >
-            <div className="leading-4">
-              <h4 className="font-semibold">{user?.full_name || "User"}</h4>
-              <span className="text-xs text-gray-600">
-                {user?.email || "user@example.com"}
-              </span>
-            </div>
-            <button
-              onClick={() => setShowMenu(!showMenu)}
-              className="p-1 hover:bg-gray-100 rounded transition-colors"
+        {/* Avatar area — stays pinned to bottom */}
+        <div className="p-3 border-t relative bg-white bottom-0">
+          <div className="flex items-center">
+            <img
+              src={`https://ui-avatars.com/api/?name=${getInitials(
+                user?.full_name || "User"
+              )}&background=c7d2fe&color=3730a3&bold=true`}
+              alt="avatar"
+              className="w-10 h-10 rounded-md"
+            />
+
+            <div
+              className={`flex justify-between items-center overflow-hidden transition-all ${
+                expanded ? "w-52 ml-3" : "w-0"
+              }`}
             >
-              <MoreVertical size={20} />
-            </button>
+              <div className="leading-4">
+                <h4 className="font-semibold">{user?.full_name || "User"}</h4>
+                <span className="text-xs text-gray-600">
+                  {user?.email || "user@example.com"}
+                </span>
+              </div>
+              <button
+                onClick={() => setShowMenu(!showMenu)}
+                className="p-1 hover:bg-gray-100 rounded transition-colors"
+              >
+                <MoreVertical size={20} />
+              </button>
+            </div>
           </div>
 
           {/* Dropdown Menu */}

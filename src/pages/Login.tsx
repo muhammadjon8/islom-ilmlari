@@ -40,7 +40,7 @@ const LoginPage = () => {
         );
 
         // Navigate to home page
-        navigate("/home");
+        navigate("/");
       } else {
         setError("Login failed. Please try again.");
       }
