@@ -179,28 +179,43 @@ const Savollar = () => {
     setAnswerFormModalOpen(true);
   };
 
-  const handleAnswerDelete = () => {
+  const handleAnswerDelete = (questionId: string, answer: Answer) => {
+    setSelectedQuestionForAnswer(questionId);
+    setSelectedAnswer(answer);
     setAnswerConfirmModalOpen(true);
   };
 
   const confirmAnswerDelete = async () => {
     if (!selectedAnswer || !selectedQuestionForAnswer) return;
 
-    setDeleteLoading(true); // Add this if you have it
+    setDeleteLoading(true);
 
     try {
       await answerApi.remove(selectedAnswer.id);
 
-      // Option 1: Force refresh by clearing and refetching
-      setQuestions([]); // Clear current state
-      await fetchQuestions(); // Refetch fresh data
+      // Update the local state directly without refetching all questions
+      setQuestions((prevQuestions) =>
+        prevQuestions.map((question) => {
+          if (question.id === selectedQuestionForAnswer) {
+            return {
+              ...question,
+              answers: question.answers.filter(
+                (a) => a.id !== selectedAnswer.id
+              ),
+            };
+          }
+          return question;
+        })
+      );
 
       toast.success("Answer deleted successfully");
     } catch (err: any) {
       toast.error(err.response?.data?.message || "Failed to delete answer");
     } finally {
-      setAnswerConfirmModalOpen(false);
       setDeleteLoading(false);
+      setAnswerConfirmModalOpen(false);
+      setSelectedAnswer(null);
+      setSelectedQuestionForAnswer(null);
     }
   };
 
@@ -372,12 +387,14 @@ const Savollar = () => {
       {/* Question Table with Expandable Answers */}
       <QuestionTable
         questions={questions}
-        onQuestionView={handleView}
         onQuestionEdit={handleEdit}
         onQuestionDelete={handleDelete}
-        onAnswerAdd={handleAnswerAdd}
+        onQuestionView={handleView}
         onAnswerEdit={handleAnswerEdit}
-        onAnswerDelete={handleAnswerDelete}
+        onAnswerDelete={(questionId, answer) =>
+          handleAnswerDelete(questionId, answer)
+        }
+        onAnswerAdd={handleAnswerAdd}
       />
 
       {/* No Results */}

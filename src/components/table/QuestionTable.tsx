@@ -61,7 +61,7 @@ interface QuestionTableProps {
   onQuestionDelete: (question: Question) => void;
   onQuestionView: (question: Question) => void;
   onAnswerEdit: (answerId: string, answer: Answer) => void;
-  onAnswerDelete: (answerId: string) => void;
+  onAnswerDelete: (questionId: string, answer: Answer) => void;
   onAnswerAdd: (questionId: string, answerData: AnswerFormData) => void;
 }
 
@@ -273,7 +273,9 @@ const QuestionTable: React.FC<QuestionTableProps> = ({
                                     <Edit size={16} />
                                   </button>
                                   <button
-                                    onClick={() => onAnswerDelete(answer.id)}
+                                    onClick={() =>
+                                      onAnswerDelete(question.id, answer)
+                                    }
                                     className="text-red-600 hover:bg-red-50 p-1 rounded"
                                     title="Delete Answer"
                                   >
