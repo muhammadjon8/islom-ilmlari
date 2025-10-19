@@ -12,6 +12,7 @@ import LoadingScreen from "../components/Loading";
 import TablePagination from "../components/table/TablePagination";
 import TableFilter from "../components/table/TableFilter";
 import { toast } from "sonner";
+import { dateFormatted } from "../shared/utils/dateFormatted";
 
 const columns: Column<YangiliklarType>[] = [
   { key: "title_en", label: "Sarlavha (EN)" },
@@ -259,11 +260,13 @@ const Yangiliklar = () => {
       },
       {
         label: "Yaratilgan vaqti",
-        value: new Date(parseInt(yangilik.created_at)).toLocaleString(),
+        value: yangilik.created_at,
+        render: (val) => dateFormatted(val),
       },
       {
         label: "Yangilangan vaqti",
-        value: new Date(parseInt(yangilik.updated_at)).toLocaleString(),
+        value: yangilik.updated_at,
+        render: (val) => dateFormatted(val),
       }
     );
 
