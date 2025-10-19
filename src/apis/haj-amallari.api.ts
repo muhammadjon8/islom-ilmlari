@@ -1,6 +1,6 @@
 import { createApi } from "./base.api";
 
-export interface HajAmallari {
+export interface HajAmallariType {
   id: string;
   is_active: boolean;
   is_deleted: boolean;
@@ -18,4 +18,4 @@ export interface HajAmallari {
   file_id: string;
 }
 
-export const hajAmallariApi = createApi<HajAmallari>("haj-amallari");
+export const hajAmallariApi = createApi<HajAmallariType>("haj-amallari");
