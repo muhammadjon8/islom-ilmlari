@@ -5,12 +5,14 @@ interface TablePaginationProps {
   currentPage: number;
   totalPages: number;
   onPageChange: (page: number) => void;
+  disabled?: boolean;
 }
 
 const TablePagination: React.FC<TablePaginationProps> = ({
   currentPage,
   totalPages,
   onPageChange,
+  disabled = false,
 }) => {
   const getPageNumbers = () => {
     const pages: (number | string)[] = [];
@@ -35,11 +37,11 @@ const TablePagination: React.FC<TablePaginationProps> = ({
   };
 
   return (
-    <div className="flex justify-end items-center gap-2 mt-4 select-none">
+    <div className="flex justify-center items-center gap-2 mt-4 select-none">
       <button
-        disabled={currentPage === 1}
+        disabled={currentPage === 1 || disabled}
         onClick={() => onPageChange(currentPage - 1)}
-        className="px-3 py-1 border rounded disabled:opacity-50 hover:bg-gray-100"
+        className="px-3 py-1 border rounded disabled:opacity-50 hover:bg-gray-100 disabled:hover:bg-white"
       >
         <ChevronLeft size={18} />
       </button>
@@ -49,11 +51,12 @@ const TablePagination: React.FC<TablePaginationProps> = ({
           <button
             key={idx}
             onClick={() => onPageChange(page)}
+            disabled={disabled}
             className={`px-3 py-1 border border-gray-200 rounded ${
               currentPage === page
                 ? "bg-indigo-500 text-white border-indigo-500"
                 : "hover:bg-gray-100"
-            }`}
+            } disabled:opacity-50`}
           >
             {page}
           </button>
@@ -65,9 +68,9 @@ const TablePagination: React.FC<TablePaginationProps> = ({
       )}
 
       <button
-        disabled={currentPage === totalPages}
+        disabled={currentPage === totalPages || disabled}
         onClick={() => onPageChange(currentPage + 1)}
-        className="px-3 py-1 border rounded disabled:opacity-50 hover:bg-gray-100"
+        className="px-3 py-1 border rounded disabled:opacity-50 hover:bg-gray-100 disabled:hover:bg-white"
       >
         <ChevronRight size={18} />
       </button>

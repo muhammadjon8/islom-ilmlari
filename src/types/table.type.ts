@@ -19,4 +19,6 @@ export interface TableProps<T> {
   actions?: TableAction<T>[];
   filterKey?: keyof T;
   itemsPerPage?: number;
+  hideLocalFilter?: boolean;
+  hideLocalPagination?: boolean;
 }

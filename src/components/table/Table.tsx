@@ -8,28 +8,34 @@ function Table<T>({
   data,
   actions,
   filterKey,
-  itemsPerPage = 20,
+  itemsPerPage = 10,
+  hideLocalFilter = false,
+  hideLocalPagination = false,
 }: TableProps<T>) {
   const [filter, setFilter] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
+  // Only filter locally if hideLocalFilter is false
   const filteredData = useMemo(() => {
-    if (!filterKey || !filter.trim()) return data;
+    if (hideLocalFilter || !filterKey || !filter.trim()) return data;
     return data.filter((row) =>
       String(row[filterKey]).toLowerCase().includes(filter.toLowerCase())
     );
-  }, [filter, data, filterKey]);
+  }, [filter, data, filterKey, hideLocalFilter]);
 
+  // Only paginate locally if hideLocalPagination is false
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedData = filteredData.slice(
-    startIndex,
-    startIndex + itemsPerPage
-  );
+  const paginatedData = hideLocalPagination
+    ? filteredData
+    : filteredData.slice(startIndex, startIndex + itemsPerPage);
 
   return (
     <div className="bg-white p-4 rounded-lg shadow-md">
-      {filterKey && <TableFilter value={filter} onChange={setFilter} />}
+      {/* Only show local filter if not hidden and filterKey exists */}
+      {filterKey && !hideLocalFilter && (
+        <TableFilter value={filter} onChange={setFilter} />
+      )}
 
       <table className="w-full border-collapse">
         <thead>
@@ -86,13 +92,16 @@ function Table<T>({
         </tbody>
       </table>
 
-      <div className="flex justify-center">
-        <TablePagination
-          currentPage={currentPage}
-          totalPages={totalPages || 1}
-          onPageChange={setCurrentPage}
-        />
-      </div>
+      {/* Only show local pagination if not hidden */}
+      {!hideLocalPagination && totalPages > 1 && (
+        <div className="flex justify-center">
+          <TablePagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+          />
+        </div>
+      )}
     </div>
   );
 }
