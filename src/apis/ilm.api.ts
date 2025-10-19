@@ -1,6 +1,6 @@
 import { createApi } from "./base.api";
 
-export interface Ilm {
+export interface IlmType {
   id: string;
   is_active: boolean;
   is_deleted: boolean;
@@ -18,4 +18,4 @@ export interface Ilm {
   file_id: string;
   bob_id: string;
 }
-export const ilmAPi = createApi<Ilm>("ilm");
+export const ilmAPi = createApi<IlmType>("ilm");
