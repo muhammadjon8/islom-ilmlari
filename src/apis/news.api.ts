@@ -1,6 +1,12 @@
-import { createApi } from "./base.api";
+import axiosInstance from "./axios-instance";
+import {
+  createApi,
+  type PaginatedApiResponse,
+  type PaginatedResponse,
+  type QueryParams,
+} from "./base.api";
 
-export interface Yangiliklar {
+export interface YangiliklarType {
   id: string;
   is_active: boolean;
   is_deleted: boolean;
@@ -18,4 +24,23 @@ export interface Yangiliklar {
   url: string;
 }
 
-export const yangiliklarApi = createApi<Yangiliklar>("admin/news");
+const yangiliklarBaseApi = createApi<YangiliklarType>("admin/news");
+
+export const yangiliklarApi = {
+  ...yangiliklarBaseApi,
+  getPaginated: async (
+    params?: QueryParams
+  ): Promise<PaginatedResponse<YangiliklarType>> => {
+    const response = await axiosInstance.get<
+      PaginatedApiResponse<YangiliklarType>
+    >(`/admin/news/all/pagination`, { params });
+
+    return {
+      items: response.data.data,
+      total: response.data.total_elements,
+      page: response.data.current_page,
+      page_size: response.data.page_size,
+      total_pages: response.data.total_pages,
+    };
+  },
+};
