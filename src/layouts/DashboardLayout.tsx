@@ -13,7 +13,7 @@ export default function DashboardLayout() {
   const location = useLocation();
 
   return (
-    <div className="flex">
+    <div className="flex h-screen">
       <Sidebar>
         <SidebarItem
           text="Qur'on Ilmi"

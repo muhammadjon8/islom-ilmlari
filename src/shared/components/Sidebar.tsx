@@ -54,7 +54,7 @@ export default function Sidebar({ children }: { children: JSX.Element[] }) {
 
   return (
     <aside
-      className={`h-full transition-all duration-300 ${
+      className={`transition-all duration-300 ${
         expanded ? "w-72" : "w-16"
       }`}
     >
@@ -78,7 +78,7 @@ export default function Sidebar({ children }: { children: JSX.Element[] }) {
 
         {/* Sidebar items (scrollable area) */}
         <SidebarContext.Provider value={{ expanded }}>
-          <ul className="flex-1 px-3 overflow-y-auto">{children}</ul>
+          <ul className="flex-1 px-3">{children}</ul>
         </SidebarContext.Provider>
 
         {/* Avatar area — stays pinned to bottom */}
