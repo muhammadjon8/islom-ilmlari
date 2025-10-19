@@ -2,6 +2,7 @@ import { Outlet, useLocation } from "react-router-dom";
 import Sidebar, { SidebarItem } from "../shared/components/Sidebar";
 import {
   Book,
+  Feather,
   FileQuestion,
   LightbulbIcon,
   MenuIcon,
@@ -68,6 +69,12 @@ export default function DashboardLayout() {
           icon={<Newspaper />}
           active={location.pathname === "/yangiliklar"}
           href="/yangiliklar"
+        />
+        <SidebarItem
+          text="Boblar"
+          icon={<Feather />}
+          active={location.pathname === "/bob"}
+          href="/bob"
         />
       </Sidebar>
 

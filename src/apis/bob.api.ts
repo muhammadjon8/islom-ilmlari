@@ -1,6 +1,6 @@
 import { createApi } from "./base.api";
 
-export interface Ilm {
+export interface BobType {
   id: string;
   is_active: boolean;
   is_deleted: boolean;
@@ -11,11 +11,7 @@ export interface Ilm {
   title_ru: string;
   title_en: string;
   title_arab: string;
-  text_uz: string;
-  text_ru: string;
-  text_en: string;
-  text_arab: string;
-  file_id: string;
-  bob_id: string;
 }
-export const ilmAPi = createApi<Ilm>("ilm");
+
+export const ilmBobApi = createApi<BobType>("ilm-bob");
+export const quranIlmBobApi = createApi<BobType>("quran-ilm-bob");

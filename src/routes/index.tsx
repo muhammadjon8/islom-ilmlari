@@ -18,6 +18,7 @@ import Savollar from "../pages/Savollar";
 import HadisSharhlari from "../pages/HadisSharhlari";
 import HajAmallari from "../pages/HajAmallari";
 import Yangiliklar from "../pages/Yangliklar";
+import BobPage from "../pages/Bob";
 
 const routes = createBrowserRouter(
   createRoutesFromElements(
@@ -44,6 +45,7 @@ const routes = createBrowserRouter(
         <Route path="kategoriyalar" element={<Kategoriyalar />} />
         <Route path="haj-amallari" element={<HajAmallari />} />
         <Route path="ilm" element={<Ilm />} />
+        <Route path="bob" element={<BobPage />} />
       </Route>
 
       <Route path="*" element={<NotFound />} />

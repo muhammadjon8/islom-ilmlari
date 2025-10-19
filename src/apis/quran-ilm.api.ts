@@ -19,18 +19,5 @@ export interface QuranIlm {
   bob_id: string;
 }
 
-export interface QuranIlmBob {
-  id: string;
-  is_active: boolean;
-  is_deleted: boolean;
-  created_at: string;
-  updated_at: string;
-  deleted_at: string | null;
-  title_uz: string;
-  title_ru: string;
-  title_en: string;
-  title_arab: string;
-}
 
 export const quranIlmAPi = createApi<QuranIlm>("quran-ilm");
-export const quranIlmBobAPi = createApi<QuranIlmBob>("quran-ilm-bob");
