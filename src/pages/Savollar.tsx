@@ -20,6 +20,7 @@ import { categoryApi, type Category } from "../apis/category.api";
 import { answerApi } from "../apis/answers.api";
 import { dateFormatted } from "../shared/utils/dateFormatted";
 import QuestionFormModal from "../components/questions/QuestionsFormModal";
+import MultipleQuestionsFormModal from "../components/questions/MultipleQuestionsFormModal";
 
 const Savollar = () => {
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -43,6 +44,8 @@ const Savollar = () => {
   );
   const [isEditMode, setIsEditMode] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [multipleQuestionsModalOpen, setMultipleQuestionsModalOpen] =
+    useState(false);
 
   // Answer Modals
   const [answerFormModalOpen, setAnswerFormModalOpen] = useState(false);
@@ -271,6 +274,10 @@ const Savollar = () => {
     },
   ];
 
+  const handleAddMultiple = () => {
+    setMultipleQuestionsModalOpen(true);
+  };
+
   const getViewFields = (question: Question): ViewField[] => [
     { label: "ID", value: question.id },
     { label: "Savol (Inglizcha)", value: question.name_en },
@@ -317,13 +324,22 @@ const Savollar = () => {
     <div className="p-6">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-xl font-semibold">Savollar</h1>
-        <button
-          onClick={handleAdd}
-          className="flex items-center gap-2 bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600 transition-colors"
-        >
-          <Plus size={20} />
-          Yangi savol qo'shish
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={handleAdd}
+            className="flex items-center gap-2 bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600 transition-colors"
+          >
+            <Plus size={20} />
+            Yangi savol qo'shish
+          </button>
+          <button
+            onClick={handleAddMultiple}
+            className="flex items-center gap-2 bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600 transition-colors"
+          >
+            <Plus size={20} />
+            Ko'proq savollar qo'shish
+          </button>
+        </div>
       </div>
 
       {/* Search Filter */}
@@ -397,6 +413,17 @@ const Savollar = () => {
           loading={deleteLoading}
         />
       )}
+
+      {/* Multiple Questions Modal */}
+      <MultipleQuestionsFormModal
+        isOpen={multipleQuestionsModalOpen}
+        onClose={() => setMultipleQuestionsModalOpen(false)}
+        categories={categories}
+        onSuccess={() => {
+          toast.success("Questions created successfully");
+          fetchQuestions();
+        }}
+      />
 
       {/* Question Form Modal */}
       <QuestionFormModal
