@@ -20,7 +20,8 @@ export interface FormField {
     | "checkbox"
     | "date"
     | "file"
-    | "searchable-select";
+    | "searchable-select"
+    | "url";
   placeholder?: string;
   required?: boolean;
   options?: { label: string; value: string | number }[];

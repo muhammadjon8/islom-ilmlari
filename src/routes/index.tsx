@@ -11,13 +11,13 @@ import ProtectedRoute from "./protected";
 import { QuronIlmi } from "../pages/QuronIlmi";
 import { QuronTavsiri } from "../pages/QuronTavsiri";
 import { Ilm } from "../pages/Ilm";
-import { Yangiliklar } from "../pages/Yangliklar";
-import { HadishSharhlari } from "../pages/HadisSharhlari";
-import { HajAmallari } from "../pages/HajAmallari";
 import NotFound from "../components/NotFound";
 import Duolar from "../pages/Duolar";
 import Kategoriyalar from "../pages/Kategoriyalar";
 import Savollar from "../pages/Savollar";
+import HadisSharhlari from "../pages/HadisSharhlari";
+import HajAmallari from "../pages/HajAmallari";
+import Yangiliklar from "../pages/Yangliklar";
 
 const routes = createBrowserRouter(
   createRoutesFromElements(
@@ -40,7 +40,7 @@ const routes = createBrowserRouter(
         <Route path="duolar" element={<Duolar />} />
         <Route path="savollar" element={<Savollar />} />
         <Route path="yangiliklar" element={<Yangiliklar />} />
-        <Route path="hadis-sharhlari" element={<HadishSharhlari />} />
+        <Route path="hadis-sharhlari" element={<HadisSharhlari />} />
         <Route path="kategoriyalar" element={<Kategoriyalar />} />
         <Route path="haj-amallari" element={<HajAmallari />} />
         <Route path="ilm" element={<Ilm />} />

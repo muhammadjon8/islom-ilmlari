@@ -55,14 +55,10 @@ const Kategoriyalar = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  // Pagination & Search state
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
-  const PAGE_SIZE = 10;
-
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [formModalOpen, setFormModalOpen] = useState(false);
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
@@ -71,7 +67,8 @@ const Kategoriyalar = () => {
   );
   const [isEditMode, setIsEditMode] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
-  const { create, remove, update, getAll, getPaginated } = categoryApi;
+  const PAGE_SIZE = 10;
+  const { create, remove, update, getPaginated } = categoryApi;
 
   // Debounce search input
   useEffect(() => {
@@ -79,41 +76,40 @@ const Kategoriyalar = () => {
       setDebouncedSearch(searchQuery);
       setCurrentPage(1); // Reset to first page on search
     }, 500);
-
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
+  // Fetch categories with pagination
   const fetchCategories = async () => {
     try {
       setLoading(true);
       setError(null);
-
       const response = await getPaginated({
         page: currentPage,
         page_size: PAGE_SIZE,
         search: debouncedSearch || undefined,
       });
 
-      // The response is already in paginated format from base.api.ts
-      setCategories(response.items);
-      setTotalPages(response.total_pages);
-
-      console.log("API Response:", response); // Debug log
+      setCategories(response.items || []);
+      setTotalPages(response.total_pages || 1);
     } catch (err: any) {
-      setError(err.response?.data?.message || "Failed to fetch categories");
-      console.error("Error fetching categories:", err);
+      setError(
+        err.response?.data?.message ||
+          "Kategoriyalarni yuklashda xatolik yuz berdi"
+      );
+      setCategories([]);
+      setTotalPages(1);
     } finally {
       setLoading(false);
     }
   };
-
   useEffect(() => {
     fetchCategories();
   }, [currentPage, debouncedSearch]);
 
-  const handleView = async (row: Category) => {
-    setViewModalOpen(true);
+  const handleView = (row: Category) => {
     setSelectedCategory(row);
+    setViewModalOpen(true);
   };
 
   const handleEdit = (row: Category) => {
@@ -136,18 +132,20 @@ const Kategoriyalar = () => {
   const confirmDelete = async () => {
     if (!selectedCategory) return;
 
-    setDeleteLoading(true);
     try {
+      setDeleteLoading(true);
       await remove(selectedCategory.id);
-      toast.success("Category deleted successfully");
-
-      // Refresh the current page
+      toast.success("Kategoriya muvaffaqiyatli o'chirildi");
+      setCurrentPage(1); // Reset to first page after deletion
+      setConfirmModalOpen(false);
       await fetchCategories();
     } catch (err: any) {
-      toast.error(err.response?.data?.message || "Failed to delete category");
+      toast.error(
+        err.response?.data?.message ||
+          "Kategoriyani o'chirishda xatolik yuz berdi"
+      );
     } finally {
       setDeleteLoading(false);
-      setConfirmModalOpen(false);
     }
   };
 
@@ -155,66 +153,52 @@ const Kategoriyalar = () => {
     try {
       if (isEditMode && selectedCategory) {
         await update(selectedCategory.id, data);
-        toast.success("Category updated successfully");
+        toast.success("Kategoriya muvaffaqiyatli yangilandi");
       } else {
         await create(data as any);
-        toast.success("Category created successfully");
-        // Go to first page to see the new item
-        setCurrentPage(1);
+        toast.success("Kategoriya muvaffaqiyatli yaratildi");
+        setCurrentPage(1); // Go to first page to see new item
       }
-      await fetchCategories();
+      setFormModalOpen(false);
     } catch (err: any) {
-      toast.error(err.response?.data?.message || "Failed to save category");
+      toast.error(
+        err.response?.data?.message ||
+          "Kategoriyani saqlashda xatolik yuz berdi"
+      );
       throw err;
     }
   };
 
   const handlePageChange = (page: number) => {
-    setCurrentPage(page);
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
   };
 
   const handleSearchChange = (value: string) => {
     setSearchQuery(value);
   };
 
-  const getViewFields = (category: Category): ViewField[] => {
-    const fields: ViewField[] = [
-      { label: "ID", value: category.id },
-      { label: "Nomi (Inglizcha)", value: category.name_en },
-      { label: "Nomi (O'zbekcha)", value: category.name_uz },
-      { label: "Nomi (Ruscha)", value: category.name_ru },
-      { label: "Nomi (Arabcha)", value: category.name_arab },
-      {
-        label: "Active",
-        value: category.is_active,
-        render: (val) => (val ? "Yes" : "No"),
-      },
-      {
-        label: "Yaratilgan vaqti",
-        value: new Date(parseInt(category.created_at)).toLocaleString(),
-      },
-      {
-        label: "Yangilangan vaqti",
-        value: new Date(parseInt(category.updated_at)).toLocaleString(),
-      },
-    ];
-
-    return fields;
-  };
-
-  if (loading && categories.length === 0) {
-    return <LoadingScreen />;
-  }
-
-  if (error && categories.length === 0) {
-    return (
-      <div className="p-6">
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-          {error}
-        </div>
-      </div>
-    );
-  }
+  const getViewFields = (category: Category): ViewField[] => [
+    { label: "ID", value: category.id },
+    { label: "Nomi (Inglizcha)", value: category.name_en },
+    { label: "Nomi (O'zbekcha)", value: category.name_uz },
+    { label: "Nomi (Ruscha)", value: category.name_ru },
+    { label: "Nomi (Arabcha)", value: category.name_arab },
+    {
+      label: "Faol",
+      value: category.is_active,
+      render: (val) => (val ? "Ha" : "Yo'q"),
+    },
+    {
+      label: "Yaratilgan vaqti",
+      value: new Date(parseInt(category.created_at)).toLocaleString(),
+    },
+    {
+      label: "Yangilangan vaqti",
+      value: new Date(parseInt(category.updated_at)).toLocaleString(),
+    },
+  ];
 
   return (
     <div className="p-6">
@@ -229,7 +213,6 @@ const Kategoriyalar = () => {
         </button>
       </div>
 
-      {/* Search Filter */}
       <TableFilter
         value={searchQuery}
         onChange={handleSearchChange}
@@ -237,62 +220,67 @@ const Kategoriyalar = () => {
         disabled={loading}
       />
 
-      {/* Loading Overlay for subsequent loads */}
-      {loading && categories.length > 0 && (
-        <div className="flex justify-center py-4">
-          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-500"></div>
+      {loading && categories.length === 0 ? (
+        <LoadingScreen />
+      ) : error && categories.length === 0 ? (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+          {error}
         </div>
+      ) : (
+        <>
+          {loading && categories.length > 0 && (
+            <div className="flex justify-center py-4">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-500"></div>
+            </div>
+          )}
+
+          <Table
+            columns={columns}
+            data={categories}
+            filterKey="name_en"
+            hideLocalFilter={true}
+            hideLocalPagination={true}
+            actions={[
+              {
+                label: "Ko'rish",
+                onClick: handleView,
+                className: "text-blue-600 hover:underline",
+                icon: <EyeIcon size={20} />,
+              },
+              {
+                label: "Tahrirlash",
+                onClick: handleEdit,
+                className: "text-green-600 hover:underline",
+                icon: <Edit size={20} />,
+              },
+              {
+                label: "O'chirish",
+                onClick: handleDelete,
+                className: "text-red-600 hover:underline",
+                icon: <Trash size={20} />,
+              },
+            ]}
+          />
+
+          {!loading && categories.length === 0 && (
+            <div className="text-center py-8 text-gray-500">
+              {debouncedSearch
+                ? "Hech qanday natija topilmadi"
+                : "Kategoriyalar mavjud emas"}
+            </div>
+          )}
+
+          {totalPages > 1 && (
+            <TablePagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+              disabled={loading}
+            />
+          )}
+        </>
       )}
 
-      {/* Table */}
-      <Table
-        columns={columns}
-        data={categories}
-        filterKey="name_en"
-        hideLocalFilter={true}
-        hideLocalPagination={true}
-        actions={[
-          {
-            label: "View",
-            onClick: handleView,
-            className: "text-blue-600 hover:underline",
-            icon: <EyeIcon size={20} />,
-          },
-          {
-            label: "Edit",
-            onClick: handleEdit,
-            className: "text-green-600 hover:underline",
-            icon: <Edit size={20} />,
-          },
-          {
-            label: "Delete",
-            onClick: handleDelete,
-            className: "text-red-600 hover:underline",
-            icon: <Trash size={20} />,
-          },
-        ]}
-      />
-
-      {/* No Results Message */}
-      {!loading && categories.length === 0 && (
-        <div className="text-center py-8 text-gray-500">
-          {debouncedSearch
-            ? "Hech qanday natija topilmadi"
-            : "Kategoriyalar mavjud emas"}
-        </div>
-      )}
-
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <TablePagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={handlePageChange}
-          disabled={loading}
-        />
-      )}
-
-      {/* View Modal */}
       {selectedCategory && (
         <ViewModal
           isOpen={viewModalOpen}
@@ -302,7 +290,6 @@ const Kategoriyalar = () => {
         />
       )}
 
-      {/* Confirm Delete Modal */}
       {selectedCategory && (
         <ConfirmModal
           isOpen={confirmModalOpen}
@@ -317,7 +304,6 @@ const Kategoriyalar = () => {
         />
       )}
 
-      {/* Form Modal (Add/Edit) */}
       <FormModal
         isOpen={formModalOpen}
         onClose={() => setFormModalOpen(false)}

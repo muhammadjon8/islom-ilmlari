@@ -10,6 +10,8 @@ import FormModal from "../shared/components/FormModal";
 import ConfirmModal from "../shared/components/ConfirmModal";
 import { getFileById, type FileData } from "../apis/file-upload.api";
 import LoadingScreen from "../components/Loading";
+import TablePagination from "../components/table/TablePagination";
+import TableFilter from "../components/table/TableFilter";
 import { toast } from "sonner";
 
 const columns: Column<Dua>[] = [
@@ -95,7 +97,10 @@ const Duolar = () => {
   const [duolar, setDuolar] = useState<Dua[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [formModalOpen, setFormModalOpen] = useState(false);
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
@@ -103,17 +108,36 @@ const Duolar = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [fileData, setFileData] = useState<FileData | null>(null);
-  const {create, remove, update, getAll} = duasApi
+  const PAGE_SIZE = 10;
+  const { create, remove, update, getPaginated } = duasApi;
 
+  // Debounce search input
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+      setCurrentPage(1); // Reset to first page on search
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // Fetch duolar with pagination
   const fetchDuolar = async () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await getAll();
-      setDuolar(data);
+      const response = await getPaginated({
+        page: currentPage,
+        page_size: PAGE_SIZE,
+        search: debouncedSearch || undefined,
+      });
+      setDuolar(response.items || []);
+      setTotalPages(response.total_pages || 1);
     } catch (err: any) {
-      setError(err.response?.data?.message || "Failed to fetch duas");
-      console.error("Error fetching duolar:", err);
+      setError(
+        err.response?.data?.message || "Duolarni yuklashda xatolik yuz berdi"
+      );
+      setDuolar([]);
+      setTotalPages(1);
     } finally {
       setLoading(false);
     }
@@ -121,11 +145,11 @@ const Duolar = () => {
 
   useEffect(() => {
     fetchDuolar();
-  }, []);
+  }, [currentPage, debouncedSearch]);
 
   const handleView = async (row: Dua) => {
-    setViewModalOpen(true);
     setSelectedDua(row);
+    setViewModalOpen(true);
 
     if (row.file_id) {
       try {
@@ -160,13 +184,17 @@ const Duolar = () => {
   const confirmDelete = async () => {
     if (!selectedDua) return;
 
-    setDeleteLoading(true);
     try {
+      setDeleteLoading(true);
       await remove(selectedDua.id);
-      toast.success("Dua deleted successfully");
-      setDuolar((prev) => prev.filter((dua) => dua.id !== selectedDua.id));
+      toast.success("Duo muvaffaqiyatli o'chirildi");
+      setCurrentPage(1); // Reset to first page after deletion
+      setConfirmModalOpen(false);
+      await fetchDuolar();
     } catch (err: any) {
-      toast.error(err.response?.data?.message || "Failed to delete dua");
+      toast.error(
+        err.response?.data?.message || "Duoni o'chirishda xatolik yuz berdi"
+      );
     } finally {
       setDeleteLoading(false);
     }
@@ -176,17 +204,30 @@ const Duolar = () => {
     try {
       if (isEditMode && selectedDua) {
         await update(selectedDua.id, data);
-        await fetchDuolar();
-        toast.success("Dua updated successfully");
+        toast.success("Duo muvaffaqiyatli yangilandi");
       } else {
         await create(data as any);
-        await fetchDuolar();
-        toast.success("Dua created successfully");
+        toast.success("Duo muvaffaqiyatli yaratildi");
+        setCurrentPage(1); // Go to first page to see new item
       }
+      setFormModalOpen(false);
+      await fetchDuolar();
     } catch (err: any) {
-      toast.error(err.response?.data?.message || "Failed to save dua");
+      toast.error(
+        err.response?.data?.message || "Duoni saqlashda xatolik yuz berdi"
+      );
       throw err;
     }
+  };
+
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
+
+  const handleSearchChange = (value: string) => {
+    setSearchQuery(value);
   };
 
   const getViewFields = (dua: Dua): ViewField[] => {
@@ -217,9 +258,9 @@ const Duolar = () => {
 
     fields.push(
       {
-        label: "Active",
+        label: "Faol",
         value: dua.is_active,
-        render: (val) => (val ? "Yes" : "No"),
+        render: (val) => (val ? "Ha" : "Yo'q"),
       },
       {
         label: "Yaratilgan vaqti",
@@ -234,19 +275,6 @@ const Duolar = () => {
     return fields;
   };
 
-  if (loading) {
-    return <LoadingScreen />;
-  }
-  if (error) {
-    return (
-      <div className="p-6">
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-          {error}
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-4">
@@ -260,31 +288,73 @@ const Duolar = () => {
         </button>
       </div>
 
-      <Table
-        columns={columns}
-        data={duolar}
-        filterKey="title_en"
-        actions={[
-          {
-            label: "View",
-            onClick: handleView,
-            className: "text-blue-600 hover:underline",
-            icon: <EyeIcon size={20} />,
-          },
-          {
-            label: "Edit",
-            onClick: handleEdit,
-            className: "text-green-600 hover:underline",
-            icon: <Edit size={20} />,
-          },
-          {
-            label: "Delete",
-            onClick: handleDelete,
-            className: "text-red-600 hover:underline",
-            icon: <Trash size={20} />,
-          },
-        ]}
+      <TableFilter
+        value={searchQuery}
+        onChange={handleSearchChange}
+        placeholder="Qidirish (sarlavha, matn...)"
+        disabled={loading}
       />
+
+      {loading && duolar.length === 0 ? (
+        <LoadingScreen />
+      ) : error && duolar.length === 0 ? (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+          {error}
+        </div>
+      ) : (
+        <>
+          {loading && duolar.length > 0 && (
+            <div className="flex justify-center py-4">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-500"></div>
+            </div>
+          )}
+
+          <Table
+            columns={columns}
+            data={duolar}
+            filterKey="title_en"
+            hideLocalFilter={true}
+            hideLocalPagination={true}
+            actions={[
+              {
+                label: "Ko'rish",
+                onClick: handleView,
+                className: "text-blue-600 hover:underline",
+                icon: <EyeIcon size={20} />,
+              },
+              {
+                label: "Tahrirlash",
+                onClick: handleEdit,
+                className: "text-green-600 hover:underline",
+                icon: <Edit size={20} />,
+              },
+              {
+                label: "O'chirish",
+                onClick: handleDelete,
+                className: "text-red-600 hover:underline",
+                icon: <Trash size={20} />,
+              },
+            ]}
+          />
+
+          {!loading && duolar.length === 0 && (
+            <div className="text-center py-8 text-gray-500">
+              {debouncedSearch
+                ? "Hech qanday natija topilmadi"
+                : "Duolar mavjud emas"}
+            </div>
+          )}
+
+          {totalPages > 1 && (
+            <TablePagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+              disabled={loading}
+            />
+          )}
+        </>
+      )}
 
       {/* View Modal */}
       {selectedDua && (
@@ -295,13 +365,14 @@ const Duolar = () => {
           fields={getViewFields(selectedDua)}
         />
       )}
+
       {selectedDua && (
         <ConfirmModal
           isOpen={confirmModalOpen}
           onClose={() => setConfirmModalOpen(false)}
           onConfirm={confirmDelete}
           title="Duoni o'chirish"
-          message={`Bo duo o'chirilmoqda: "${selectedDua.title_en}"? O'chirishni tasdiqlang.`}
+          message={`Bu duo o'chirilmoqda: "${selectedDua.title_en}"? O'chirishni tasdiqlang.`}
           confirmLabel="O'chirish"
           cancelLabel="Bekor qilish"
           type="danger"
