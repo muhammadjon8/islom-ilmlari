@@ -1,6 +1,6 @@
 import { createApi } from "./base.api";
 
-export interface QuranIlm {
+export interface QuranIlmType {
   id: string;
   is_active: boolean;
   is_deleted: boolean;
@@ -20,4 +20,4 @@ export interface QuranIlm {
 }
 
 
-export const quranIlmAPi = createApi<QuranIlm>("quran-ilm");
+export const quranIlmAPi = createApi<QuranIlmType>("quran-ilm");

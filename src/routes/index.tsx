@@ -8,8 +8,6 @@ import DashboardLayout from "../layouts/DashboardLayout";
 import AuthLayout from "../layouts/AuthLayout";
 import LoginPage from "../pages/Login";
 import ProtectedRoute from "./protected";
-import { QuronIlmi } from "../pages/QuronIlmi";
-import { QuronTavsiri } from "../pages/QuronTavsiri";
 import NotFound from "../components/NotFound";
 import Duolar from "../pages/Duolar";
 import Kategoriyalar from "../pages/Kategoriyalar";
@@ -19,6 +17,8 @@ import HajAmallari from "../pages/HajAmallari";
 import Yangiliklar from "../pages/Yangliklar";
 import BobPage from "../pages/Bob";
 import Ilm from "../pages/Ilm";
+import QuranIlm from "../pages/QuronIlmi";
+import QuronTavsiri from "../pages/QuronTavsiri";
 
 const routes = createBrowserRouter(
   createRoutesFromElements(
@@ -36,7 +36,7 @@ const routes = createBrowserRouter(
         }
       >
         <Route index element={<Navigate to="/" replace />} />
-        <Route path="quron-ilmi" element={<QuronIlmi />} />
+        <Route path="quron-ilmi" element={<QuranIlm/>} />
         <Route path="quron-tavsiri" element={<QuronTavsiri />} />
         <Route path="duolar" element={<Duolar />} />
         <Route path="savollar" element={<Savollar />} />
