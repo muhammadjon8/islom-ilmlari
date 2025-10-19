@@ -100,4 +100,4 @@ export const createApi = <T extends { id: string }>(endpoint: string) => {
   };
 };
 
-export type { QueryParams, PaginatedResponse };
+export type { QueryParams, PaginatedResponse, PaginatedApiResponse };

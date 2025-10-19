@@ -57,20 +57,4 @@ export const questionsApi = {
 
     return response.data.data;
   },
-
-  async getPaginated(
-    page: number = 1,
-    limit: number = 10,
-    search: string = ""
-  ): Promise<PaginatedQuestionsResponse<Question>> {
-    const response = await axiosInstance.get<
-      PaginatedQuestionsResponse<Question>
-    >(
-      `/questions/pagination?page=${page}&limit=${limit}&search=${encodeURIComponent(
-        search
-      )}`
-    );
-
-    return response.data;
-  },
 };

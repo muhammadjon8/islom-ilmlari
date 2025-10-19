@@ -3,8 +3,8 @@ import { createApi } from "./base.api";
 
 export interface Answer {
   id: string;
-  is_active: boolean;
-  is_deleted: boolean;
+  is_active?: boolean;
+  is_deleted?: boolean;
   created_at: string;
   updated_at: string;
   deleted_at: string | null;
