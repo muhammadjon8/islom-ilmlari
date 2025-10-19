@@ -257,13 +257,6 @@ const FormModal = ({
                   key={field.name}
                   className={field.fullWidth ? "md:col-span-2" : ""}
                 >
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    {field.label}
-                    {field.required && (
-                      <span className="text-red-500 ml-1">*</span>
-                    )}
-                  </label>
-
                   {field.type === "textarea" ? (
                     <textarea
                       value={formData[field.name] || ""}
