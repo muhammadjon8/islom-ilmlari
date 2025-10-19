@@ -29,15 +29,21 @@ export interface Question {
   name_ru: string;
   name_en: string;
   name_arab: string;
-  answers: Answer[];
-  category: {
+  answers?: Answer[];
+  category?: {
     id: string;
     name_uz: string;
+    name_ru?: string;
     name_en: string;
+    name_arab?: string;
   };
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
+  category_name?: string;
+  name?: string;  // Added to match API type
+  is_active?: boolean;
+  created_at?: string;  // Made optional to match API type
+  updated_at?: string;  // Made optional to match API type
+  is_deleted?: boolean;
+  deleted_at?: string | null;
 }
 
 export interface QuestionTableAction {
@@ -156,7 +162,7 @@ const QuestionTable: React.FC<QuestionTableProps> = ({
           ) : (
             questions.map((question) => {
               const isExpanded = expandedQuestionId === question.id;
-              const answerCount = question.answers.length;
+              const answerCount = question.answers?.length || 0;
               const canAddAnswer = answerCount < 6;
 
               return (
@@ -175,9 +181,9 @@ const QuestionTable: React.FC<QuestionTableProps> = ({
                         )}
                       </button>
                     </td>
-                    <td className="p-3 text-sm">{question.name_en}</td>
-                    <td className="p-3 text-sm">{question.name_uz}</td>
-                    <td className="p-3 text-sm">{question.category.name_en}</td>
+                    <td className="p-3 text-sm">{question.name_en || '-'}</td>
+                    <td className="p-3 text-sm">{question.name_uz || '-'}</td>
+                    <td className="p-3 text-sm">{question.category?.name_en || question.category_name || '-'}</td>
                     <td className="p-3 text-sm">
                       <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">
                         {answerCount} javob
@@ -219,7 +225,7 @@ const QuestionTable: React.FC<QuestionTableProps> = ({
                             Javoblar:
                           </h4>
 
-                          {question.answers.length === 0 ? (
+                          {!question.answers || question.answers.length === 0 ? (
                             <div className="text-gray-500 text-sm py-2">
                               Javoblar mavjud emas
                             </div>

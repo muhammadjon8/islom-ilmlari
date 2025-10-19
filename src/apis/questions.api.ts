@@ -5,19 +5,19 @@ import type { Category } from "./category.api";
 
 export interface Question {
   id: string;
-  is_active: boolean;
-  is_deleted: boolean;
-  created_at: string;
-  updated_at: string;
-  deleted_at: string | null;
+  is_active?: boolean;
+  is_deleted?: boolean;
+  created_at?: string;
+  updated_at?: string;
+  deleted_at?: string | null;
   name_uz: string;
   name_ru: string;
   name_en: string;
   name_arab: string;
-  category: Category;
-  name: string;
-  answers: Answer[];
-  category_name: string;
+  category?: Category;
+  name?: string;
+  answers?: Answer[];
+  category_name?: string;
 }
 
 export interface CreateQuestionDto {
