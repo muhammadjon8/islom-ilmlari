@@ -16,6 +16,7 @@ import LoadingScreen from "../components/Loading";
 import TablePagination from "../components/table/TablePagination";
 import TableFilter from "../components/table/TableFilter";
 import { toast } from "sonner";
+import { dateFormatted } from "../shared/utils/dateFormatted";
 
 const columns: Column<HadisSharhlariType>[] = [
   { key: "title_en", label: "Sarlavha (EN)" },
@@ -272,11 +273,13 @@ const HadisSharhlari = () => {
       },
       {
         label: "Yaratilgan vaqti",
-        value: new Date(parseInt(hadish.created_at)).toLocaleString(),
+        value: hadish.created_at,
+        render: (val) => dateFormatted(val),
       },
       {
         label: "Yangilangan vaqti",
-        value: new Date(parseInt(hadish.updated_at)).toLocaleString(),
+        value: hadish.updated_at,
+        render: (val) => dateFormatted(val),
       }
     );
 

@@ -13,6 +13,7 @@ import LoadingScreen from "../components/Loading";
 import TablePagination from "../components/table/TablePagination";
 import TableFilter from "../components/table/TableFilter";
 import { toast } from "sonner";
+import { dateFormatted } from "../shared/utils/dateFormatted";
 
 const columns: Column<HajAmallariType>[] = [
   { key: "title_en", label: "Sarlavha (EN)" },
@@ -267,11 +268,13 @@ const HajAmallari = () => {
       },
       {
         label: "Yaratilgan vaqti",
-        value: new Date(parseInt(hajAmal.created_at)).toLocaleString(),
+        value: hajAmal.created_at,
+        render: (val) => dateFormatted(val),
       },
       {
         label: "Yangilangan vaqti",
-        value: new Date(parseInt(hajAmal.updated_at)).toLocaleString(),
+        value: hajAmal.updated_at,
+        render: (val) => dateFormatted(val),
       }
     );
 

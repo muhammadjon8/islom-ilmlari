@@ -13,6 +13,7 @@ import LoadingScreen from "../components/Loading";
 import TablePagination from "../components/table/TablePagination";
 import TableFilter from "../components/table/TableFilter";
 import { toast } from "sonner";
+import { dateFormatted } from "../shared/utils/dateFormatted";
 
 const columns: Column<Dua>[] = [
   { key: "title_en", label: "Sarlavha (EN)" },
@@ -264,11 +265,13 @@ const Duolar = () => {
       },
       {
         label: "Yaratilgan vaqti",
-        value: new Date(parseInt(dua.created_at)).toLocaleString(),
+        value: dua.created_at,
+        render: (val) => dateFormatted(val),
       },
       {
         label: "Yangilangan vaqti",
-        value: new Date(parseInt(dua.updated_at)).toLocaleString(),
+        value: dua.updated_at,
+        render: (val) => dateFormatted(val),
       }
     );
 

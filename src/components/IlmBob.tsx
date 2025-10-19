@@ -12,6 +12,7 @@ import LoadingScreen from "../components/Loading";
 import TablePagination from "../components/table/TablePagination";
 import TableFilter from "../components/table/TableFilter";
 import { toast } from "sonner";
+import { dateFormatted } from "../shared/utils/dateFormatted";
 
 const columns: Column<BobType>[] = [
   { key: "title_en", label: "Sarlavha (EN)" },
@@ -191,11 +192,13 @@ const IlmBob = () => {
       },
       {
         label: "Yaratilgan vaqti",
-        value: new Date(parseInt(bob.created_at)).toLocaleString(),
+        value: bob.created_at,
+        render: (val) => dateFormatted(val),
       },
       {
         label: "Yangilangan vaqti",
-        value: new Date(parseInt(bob.updated_at)).toLocaleString(),
+        value: bob.updated_at,
+        render: (val) => dateFormatted(val),
       },
     ];
 

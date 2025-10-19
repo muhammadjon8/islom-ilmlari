@@ -12,6 +12,7 @@ import TablePagination from "../components/table/TablePagination";
 import TableFilter from "../components/table/TableFilter";
 import { toast } from "sonner";
 import { categoryApi, type Category } from "../apis/category.api";
+import { dateFormatted } from "../shared/utils/dateFormatted";
 
 const columns: Column<Category>[] = [
   { key: "name_en", label: "Nomi (EN)" },
@@ -192,11 +193,13 @@ const Kategoriyalar = () => {
     },
     {
       label: "Yaratilgan vaqti",
-      value: new Date(parseInt(category.created_at)).toLocaleString(),
+      value: category.created_at,
+      render: (val) => dateFormatted(val),
     },
     {
       label: "Yangilangan vaqti",
-      value: new Date(parseInt(category.updated_at)).toLocaleString(),
+      value: category.updated_at,
+      render: (val) => dateFormatted(val),
     },
   ];
 
