@@ -19,9 +19,7 @@ import { questionsApi } from "../apis/questions.api";
 import { categoryApi, type Category } from "../apis/category.api";
 import { answerApi } from "../apis/answers.api";
 import { dateFormatted } from "../shared/utils/dateFormatted";
-import QuestionFormModal, {
-  type QuestionFormData,
-} from "../components/questions/QuestionsFormModal";
+import QuestionFormModal from "../components/questions/QuestionsFormModal";
 
 const Savollar = () => {
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -55,7 +53,7 @@ const Savollar = () => {
   >(null);
   const [isEditAnswerMode, setIsEditAnswerMode] = useState(false);
 
-  const { create, remove, update, getPaginated, createMultiple } = questionsApi;
+  const { create, remove, update, getPaginated } = questionsApi;
 
   // Debounce search
   useEffect(() => {
@@ -141,63 +139,20 @@ const Savollar = () => {
     }
   };
 
-  const handleFormSubmit = async (
-    data: QuestionFormData | QuestionFormData[]
-  ) => {
+  const handleFormSubmit = async (data: Record<string, any>) => {
     try {
-      setLoading(true);
-
-      if (Array.isArray(data)) {
-        if (data.length === 1) {
-          // If single question in array, use create
-          await create(data[0]);
-        } else {
-          // For multiple questions, group by category
-          const questionsByCategory = data.reduce((acc, question) => {
-            const categoryId = question.category_id;
-            if (!acc[categoryId]) {
-              acc[categoryId] = [];
-            }
-            const { category_id, ...questionData } = question;
-            acc[categoryId].push(questionData);
-            return acc;
-          }, {} as Record<string, Omit<QuestionFormData, "category_id">[]>);
-
-          // Create questions for each category
-          await Promise.all(
-            Object.entries(questionsByCategory).map(([categoryId, questions]) =>
-              createMultiple({
-                category_id: categoryId,
-                questions,
-              })
-            )
-          );
-        }
+      if (isEditMode && selectedQuestion) {
+        await update(selectedQuestion.id, data);
+        toast.success("Question updated successfully");
       } else {
-        // Handle single question (non-array case)
-        if (isEditMode && selectedQuestion) {
-          await update(selectedQuestion.id, data);
-        } else {
-          await create(data);
-        }
+        await create(data as any);
+        toast.success("Question created successfully");
+        setCurrentPage(1);
       }
-
-      toast.success(
-        isEditMode
-          ? "Savol muvaffaqiyatli yangilandi"
-          : Array.isArray(data) && data.length > 1
-          ? `${data.length} ta savol muvaffaqiyatli qo'shildi`
-          : "Savol muvaffaqiyatli qo'shildi"
-      );
-
       await fetchQuestions();
-      setFormModalOpen(false);
     } catch (err: any) {
-      const errorMessage = err.response?.data?.message || "Xatolik yuz berdi";
-      toast.error(errorMessage);
-      console.error("Error saving question(s):", err);
-    } finally {
-      setLoading(false);
+      toast.error(err.response?.data?.message || "Failed to save question");
+      throw err;
     }
   };
 
@@ -247,7 +202,7 @@ const Savollar = () => {
               ...question,
               answers: question.answers?.filter(
                 (a) => a.id !== selectedAnswer.id
-              ) || [],
+              ),
             };
           }
           return question;
@@ -324,18 +279,18 @@ const Savollar = () => {
     { label: "Savol (Arabcha)", value: question.name_arab },
     {
       label: "Kategoriya",
-      value: question.category ? `${question.category.name_uz || ''} (${question.category.name_en || ''})` : 'N/A',
+      value: `${question.category?.name_uz} (${question.category?.name_en}`,
     },
     {
       label: "Active",
       value: question.is_active,
       render: (val) => (val ? "Yes" : "No"),
     },
-    { label: "Javoblar soni", value: question.answers?.length?.toString() || '0' },
+    { label: "Javoblar soni", value: question.answers?.length.toString() },
     {
       label: "Yaratilgan vaqti",
       value: question.created_at,
-      render: (val) => val ? dateFormatted(val) : 'N/A',
+      render: (val) => dateFormatted(val),
     },
     {
       label: "Yangilangan vaqti",
