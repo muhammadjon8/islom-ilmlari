@@ -9,6 +9,7 @@ import {
   X,
   Eye,
 } from "lucide-react";
+import { toast } from "sonner";
 
 export interface Answer {
   id: string;
@@ -107,7 +108,7 @@ const QuestionTable: React.FC<QuestionTableProps> = ({
 
   const handleSaveNewAnswer = (questionId: string) => {
     if (!newAnswerData.text_uz || !newAnswerData.text_en) {
-      alert("Please fill in required fields (UZ and EN)");
+      toast("Please fill in required fields (UZ and EN)");
       return;
     }
     onAnswerAdd(questionId, newAnswerData);

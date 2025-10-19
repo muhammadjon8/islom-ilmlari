@@ -1,4 +1,4 @@
-import { Edit, EyeIcon, Trash, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import QuestionTable from "../components/table/QuestionTable";
 import type {
@@ -18,6 +18,7 @@ import { toast } from "sonner";
 import { questionsApi } from "../apis/questions.api";
 import { categoryApi, type Category } from "../apis/category.api";
 import { answerApi } from "../apis/answers.api";
+import { dateFormatted } from "../shared/utils/dateFormatted";
 
 const Savollar = () => {
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -154,7 +155,6 @@ const Savollar = () => {
     }
   };
 
-  // Answer Handlers
   const handleAnswerAdd = async (
     questionId: string,
     answerData: AnswerFormData
@@ -179,21 +179,28 @@ const Savollar = () => {
     setAnswerFormModalOpen(true);
   };
 
-  const handleAnswerDelete = (answerId: string) => {
+  const handleAnswerDelete = () => {
     setAnswerConfirmModalOpen(true);
   };
 
   const confirmAnswerDelete = async () => {
     if (!selectedAnswer || !selectedQuestionForAnswer) return;
+
+    setDeleteLoading(true); // Add this if you have it
+
     try {
       await answerApi.remove(selectedAnswer.id);
-      console.log("Deleting answer:", selectedAnswer.id);
+
+      // Option 1: Force refresh by clearing and refetching
+      setQuestions([]); // Clear current state
+      await fetchQuestions(); // Refetch fresh data
+
       toast.success("Answer deleted successfully");
-      await fetchQuestions();
     } catch (err: any) {
-      toast.error("Failed to delete answer");
+      toast.error(err.response?.data?.message || "Failed to delete answer");
     } finally {
       setAnswerConfirmModalOpen(false);
+      setDeleteLoading(false);
     }
   };
 
@@ -300,7 +307,7 @@ const Savollar = () => {
     { label: "Savol (Arabcha)", value: question.name_arab },
     {
       label: "Kategoriya",
-      value: `${question.category.name_uz} (${question.category.name_en})`,
+      value: `${question.category.name_uz} (${question.category.name_en}`,
     },
     {
       label: "Active",
@@ -310,11 +317,13 @@ const Savollar = () => {
     { label: "Javoblar soni", value: question.answers.length.toString() },
     {
       label: "Yaratilgan vaqti",
-      value: new Date(parseInt(question.created_at)).toLocaleString(),
+      value: question.created_at,
+      render: (val) => dateFormatted(val),
     },
     {
       label: "Yangilangan vaqti",
-      value: new Date(parseInt(question.updated_at)).toLocaleString(),
+      value: question.updated_at,
+      render: (val) => dateFormatted(val),
     },
   ];
 
