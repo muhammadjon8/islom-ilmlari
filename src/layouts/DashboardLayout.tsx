@@ -1,12 +1,15 @@
 import { Outlet, useLocation } from "react-router-dom";
 import Sidebar, { SidebarItem } from "../shared/components/Sidebar";
 import {
+  BadgeQuestionMark,
   Book,
   Feather,
   FileQuestion,
+  FileQuestionIcon,
   LightbulbIcon,
   MenuIcon,
   Newspaper,
+  PlaneIcon,
 } from "lucide-react";
 import { DuaIcon, QiblaIcon, QuranIcon, QuranIcon2 } from "../assets/icons";
 
@@ -60,7 +63,7 @@ export default function DashboardLayout() {
         />
         <SidebarItem
           text="Savollar"
-          icon={<FileQuestion />}
+          icon={<BadgeQuestionMark />}
           active={location.pathname === "/savollar"}
           href="/savollar"
         />
@@ -75,6 +78,12 @@ export default function DashboardLayout() {
           icon={<Feather />}
           active={location.pathname === "/bob"}
           href="/bob"
+        />
+        <SidebarItem
+          text="Umra Amallari"
+          icon={<PlaneIcon />}
+          active={location.pathname === "/umra-amallari"}
+          href="/umra-amallari"
         />
       </Sidebar>
 

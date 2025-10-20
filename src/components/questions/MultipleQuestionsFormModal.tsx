@@ -89,7 +89,6 @@ export default function MultipleQuestionsModal({
         </h2>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          {/* Category Selector */}
           <div>
             <label className="block text-sm font-medium mb-1">Category</label>
             <Controller
@@ -114,7 +113,6 @@ export default function MultipleQuestionsModal({
             )}
           </div>
 
-          {/* Questions List */}
           <div className="max-h-[400px] overflow-y-auto space-y-4 pr-2">
             {fields.map((field, index) => (
               <div
@@ -162,7 +160,6 @@ export default function MultipleQuestionsModal({
             ))}
           </div>
 
-          {/* Add / Submit Buttons */}
           <div className="flex justify-between items-center mt-5">
             <button
               type="button"

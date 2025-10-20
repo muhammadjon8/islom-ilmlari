@@ -19,6 +19,7 @@ import BobPage from "../pages/Bob";
 import Ilm from "../pages/Ilm";
 import QuranIlm from "../pages/QuronIlmi";
 import QuronTavsiri from "../pages/QuronTavsiri";
+import UmraAmallari from "../pages/UmraAmallari";
 
 const routes = createBrowserRouter(
   createRoutesFromElements(
@@ -46,6 +47,7 @@ const routes = createBrowserRouter(
         <Route path="haj-amallari" element={<HajAmallari />} />
         <Route path="ilm" element={<Ilm />} />
         <Route path="bob" element={<BobPage />} />
+        <Route path="umra-amallari" element={<UmraAmallari />} />
       </Route>
 
       <Route path="*" element={<NotFound />} />
