@@ -4,8 +4,6 @@ import {
   BadgeQuestionMark,
   Book,
   Feather,
-  FileQuestion,
-  FileQuestionIcon,
   LightbulbIcon,
   MenuIcon,
   Newspaper,
