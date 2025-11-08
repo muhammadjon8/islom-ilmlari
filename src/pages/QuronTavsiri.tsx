@@ -303,7 +303,7 @@ const QuranTavsiri = () => {
       name: "bob_id",
       label: "Bob",
       type: "searchable-select",
-      required: true,
+      required: false,
       placeholder: "Bob tanlang...",
       options: bobs.map((bob) => ({
         label: `${bob.title_uz} (${bob.title_en})`,
